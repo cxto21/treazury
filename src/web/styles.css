@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-mono;
+    margin: 0;
+    overflow-x: hidden;
+  }
+  
+  @keyframes hexOpen {
+    0% { transform: scale(0.1) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+    100% { transform: scale(1) rotate(360deg); }
+  }
+  
+  @keyframes hexLoad { 
+    0% { width: 0%; } 
+    100% { width: 100%; } 
+  }
+
+  @keyframes glitch { 
+    0%,100% { transform: translate(0); }
+    10% { transform: translate(-1px, 1px); }
+    20% { transform: translate(1px, -1px); } 
+  }
+
+  @keyframes scanline { 
+    0%,100% { opacity: 0.1; }
+    50% { opacity: 0.3; } 
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to { 
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      transform: scale(0.5);
+      opacity: 0;
+    }
+    to { 
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+@layer utilities {
+  .animate-hex-open {
+    animation: hexOpen 2s ease-out forwards;
+  }
+  
+  .animate-loading-bar {
+    animation: hexLoad 2.5s ease-out forwards;
+  }
+  
+  .scanline-overlay {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(255,255,255,0.05) 2px,
+      rgba(255,255,255,0.05) 4px
+    );
+    animation: scanline 2s infinite;
+    pointer-events: none;
+  }
+
+  .hex-clip {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  .glitch-hover:hover {
+    animation: glitch 0.3s infinite;
+  }
+}

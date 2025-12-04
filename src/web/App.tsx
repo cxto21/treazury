@@ -8,6 +8,7 @@ import { AppState, Theme } from './types';
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.LOADING);
   const [theme, setTheme] = useState<Theme>('dark');
+  const [walletAddress, setWalletAddress] = useState<string>('');
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -26,11 +27,13 @@ const App: React.FC = () => {
     setAppState(AppState.CONNECT_WALLET);
   }, []);
 
-  const handleWalletConnected = useCallback(() => {
+  const handleWalletConnected = useCallback((address: string) => {
+    setWalletAddress(address);
     setAppState(AppState.ACTIVE);
   }, []);
 
   const handleLogout = useCallback(() => {
+    setWalletAddress('');
     setAppState(AppState.CONNECT_WALLET);
   }, []);
 
@@ -52,7 +55,12 @@ const App: React.FC = () => {
         )}
         
         {appState === AppState.ACTIVE && (
-          <VaultInterface theme={theme} toggleTheme={toggleTheme} onLogout={handleLogout} />
+          <VaultInterface 
+            theme={theme} 
+            toggleTheme={toggleTheme} 
+            onLogout={handleLogout}
+            walletAddress={walletAddress}
+          />
         )}
       </div>
     </div>

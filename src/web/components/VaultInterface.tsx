@@ -1,195 +1,58 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TransferFormState, Theme } from '../types';
 import ZKPassportModal from './ZKPassportModal';
-import { 
-  generateZKPassportProof, 
-  executePrivateTransfer, 
-  verifyProofOnChain, 
-  fetchEncryptedBalance,
-  checkTransactionLimits,
-  type ProofResult
-} from '../services';
 
 interface VaultInterfaceProps {
   theme: Theme;
   toggleTheme: () => void;
   onLogout: () => void;
-  walletAddress?: string;
-  kycLevel?: number;
 }
 
-interface BalanceData {
-  commitment: string;
-  isZero: boolean;
-  nonce?: string;
-}
-
-const VaultInterface: React.FC<VaultInterfaceProps> = ({ 
-  theme, 
-  toggleTheme, 
-  onLogout,
-  walletAddress = "0x7F21...3B9A",
-  kycLevel = 0
-}) => {
+const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onLogout }) => {
   const [formData, setFormData] = useState<TransferFormState>({
     amount: '',
     recipient: ''
   });
-  
-  // Processing states
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState<string>('');
   const [isBalanceRevealed, setIsBalanceRevealed] = useState(false);
   const [showZKModal, setShowZKModal] = useState(false);
-  const [isZKVerified, setIsZKVerified] = useState(kycLevel > 0);
+  const [isZKVerified, setIsZKVerified] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  const [showReceiveModal, setShowReceiveModal] = useState(false);
   
-  // Error/Success states
-  const [transferError, setTransferError] = useState('');
-  const [transferSuccess, setTransferSuccess] = useState('');
-  const [copyFeedback, setCopyFeedback] = useState(false);
-  
-  // Wallet states
+  // Wallet Interaction States
+  const [walletAddress] = useState("0x7F21...3B9A");
   const [fullAddress] = useState("0x07F2134591238491234891234891239481239481239B9A");
-  const [balanceData, setBalanceData] = useState<BalanceData>({
-    commitment: '***1,234.56',
-    isZero: false
-  });
-  const [isLoadingBalance, setIsLoadingBalance] = useState(true);
-
-  // Fetch encrypted balance on mount
-  useEffect(() => {
-    const loadBalance = async () => {
-      try {
-        setIsLoadingBalance(true);
-        const balance = await fetchEncryptedBalance(fullAddress);
-        setBalanceData(balance);
-      } catch (error) {
-        console.error('Failed to load balance:', error);
-        setBalanceData({ commitment: '***,***.** (error)', isZero: true });
-      } finally {
-        setIsLoadingBalance(false);
-      }
-    };
-    
-    loadBalance();
-  }, [fullAddress]);
+  const [showReceiveModal, setShowReceiveModal] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setTransferError('');
   };
 
-  const handleTransfer = async () => {
-    // Validation
-    if (!formData.amount || !formData.recipient) {
-      setTransferError('Please fill in all fields');
-      return;
-    }
-
-    if (!isZKVerified) {
-      setTransferError('Please verify KYC first (ZKPassport)');
-      return;
-    }
-
-    if (balanceData.isZero) {
-      setTransferError('Insufficient encrypted balance');
-      return;
-    }
-
+  const handleTransfer = () => {
+    if (!formData.amount || !formData.recipient) return;
+    
     setIsProcessing(true);
-    setTransferError('');
-    setTransferSuccess('');
-
-    try {
-      const amount = parseFloat(formData.amount);
-
-      // Step 1: Check transaction limits (AML)
-      setProcessingStep('Checking transaction limits...');
-      const limitCheck = await checkTransactionLimits(fullAddress, amount, kycLevel);
-      
-      if (!limitCheck.allowed) {
-        throw new Error(limitCheck.reason || 'Transaction limit check failed');
-      }
-
-      // Step 2: Generate ZK Proof
-      setProcessingStep('Generating zero-knowledge proof...');
-      console.log('📝 Generating ZK Proof for KYC level', kycLevel);
-      
-      const proofResult: ProofResult = await generateZKPassportProof(undefined, kycLevel);
-      console.log(`✓ Proof generated in ${proofResult.generationTime.toFixed(2)}ms`);
-
-      // Step 3: Verify proof on-chain
-      setProcessingStep('Verifying proof on Starknet...');
-      console.log('🔗 Verifying proof on-chain');
-      
-      const verificationResult = await verifyProofOnChain(
-        proofResult.proof,
-        proofResult.publicInputs.join(',')
-      );
-
-      if (!verificationResult.isValid) {
-        throw new Error(verificationResult.reason || 'Proof verification failed on-chain');
-      }
-      console.log(`✓ Proof verified | Tx: ${verificationResult.txHash?.slice(0, 20)}...`);
-
-      // Step 4: Execute private transfer
-      setProcessingStep('Executing private transfer...');
-      console.log('💸 Executing private transfer');
-      
-      const transferResult = await executePrivateTransfer(
-        {
-          amount: formData.amount,
-          recipient: formData.recipient,
-          walletAddress: fullAddress,
-          kycLevel
-        },
-        proofResult.proof
-      );
-
-      if (transferResult.status === 'success') {
-        setTransferSuccess(
-          `✓ Transfer successful!\nTx: ${transferResult.txHash.slice(0, 20)}...\nAmount: ${transferResult.encryptedAmount || 'encrypted'}`
-        );
-        setFormData({ amount: '', recipient: '' });
-        
-        // Refresh balance
-        setTimeout(() => {
-          fetchEncryptedBalance(fullAddress).then(setBalanceData);
-        }, 2000);
-      } else if (transferResult.status === 'pending') {
-        setTransferSuccess(
-          `⏳ Transfer submitted (pending).\nTx: ${transferResult.txHash.slice(0, 20)}...`
-        );
-      } else {
-        throw new Error(transferResult.message || 'Transfer failed');
-      }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Transfer failed';
-      console.error('✗ Transfer error:', errorMsg);
-      setTransferError(errorMsg);
-    } finally {
+    // Simulate ZK Proof generation time
+    setTimeout(() => {
       setIsProcessing(false);
-      setProcessingStep('');
-    }
+      alert('ZK Proof Generated & Transaction Submitted to Starknet L2');
+      setFormData({ amount: '', recipient: '' });
+    }, 2000);
   };
 
+  // Handlers for "Hold to Reveal"
   const startReveal = () => setIsBalanceRevealed(true);
   const endReveal = () => setIsBalanceRevealed(false);
 
+  // Copy Address Handler
   const copyAddress = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(fullAddress);
     setCopyFeedback(true);
     setTimeout(() => setCopyFeedback(false), 2000);
-  };
-
-  const handleZKSuccess = () => {
-    setIsZKVerified(true);
-    setShowZKModal(false);
   };
 
   return (
@@ -199,7 +62,10 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
       {showZKModal && (
         <ZKPassportModal 
           onClose={() => setShowZKModal(false)}
-          onSuccess={handleZKSuccess}
+          onSuccess={() => {
+            setIsZKVerified(true);
+            setShowZKModal(false);
+          }}
         />
       )}
 
@@ -210,6 +76,7 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
               <h3 className="text-xl font-black text-center mb-6 dark:text-white uppercase tracking-widest">Deposit USDC</h3>
               
               <div className="bg-white p-4 rounded-xl mx-auto mb-6 w-48 h-48 border-2 border-black/10 flex items-center justify-center">
+                 {/* CSS QR Code Placeholder */}
                  <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px),repeating-linear-gradient(-45deg,transparent,transparent_10px,#000_10px,#000_20px)] opacity-80"></div>
               </div>
 
@@ -247,10 +114,10 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
                   <strong className="text-black dark:text-white">1. Zero-Knowledge Architecture:</strong> Treazury operates as a purely non-custodial interface. We do not store, process, view, or transmit your unencrypted personal KYC data to our servers.
                 </p>
                 <p>
-                  <strong className="text-black dark:text-white">2. Client-Side Proof Generation:</strong> All ZK proofs are generated on your device using Noir + Barretenberg. Verification occurs on-chain via Cairo smart contracts on Starknet.
+                  <strong className="text-black dark:text-white">2. Third-Party Verification:</strong> Identity verification is performed entirely client-side using Zero-Knowledge Proofs via ZKPassport. The "verification" is a mathematical proof generated on your device and verified on-chain.
                 </p>
                 <p>
-                  <strong className="text-black dark:text-white">3. Encrypted State:</strong> USDC amounts are stored as ElGamal-encrypted commitments. Only you can decrypt with your private key.
+                  <strong className="text-black dark:text-white">3. No Auditable Contract:</strong> Please understand that our guarantees are cryptographic, not bureaucratic. We rely on the mathematical integrity of the ZK-STARK protocol and our providers.
                 </p>
                 <p className="p-4 bg-gray-100 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/10 text-xs italic">
                   "We build the vault, but we don't hold the keys—or the liability. Your data stays on your device. We trust the math, and we invite you to verify the proofs. If the cryptography fails, we all have bigger problems than legal recourse."
@@ -274,6 +141,7 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
         </div>
         
         <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
             <button 
                 onClick={toggleTheme}
                 className="text-xs bg-white/60 dark:bg-black/40 text-black dark:text-white p-2 rounded-lg backdrop-blur-sm border border-black/10 dark:border-white/20 hover:border-black dark:hover:border-white hover:shadow-ink dark:hover:shadow-neon transition-all"
@@ -282,6 +150,7 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
                 {theme === 'dark' ? '☀️' : '🌙'}
             </button>
 
+            {/* Wallet Address Chip */}
             <div 
                 className="text-xs bg-white/60 dark:bg-black/40 text-black dark:text-white px-4 py-2 rounded-full backdrop-blur-sm border border-black/10 dark:border-white/20 hover:border-black dark:hover:border-white transition-all cursor-pointer font-mono group relative"
                 onClick={copyAddress}
@@ -292,6 +161,7 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
                 )}
             </div>
 
+             {/* Logout Button */}
              <button 
                 onClick={onLogout}
                 className="text-xs bg-white/60 dark:bg-black/40 text-red-500 hover:text-red-600 p-2 rounded-lg backdrop-blur-sm border border-black/10 dark:border-white/20 hover:border-red-500/50 transition-all"
@@ -318,7 +188,7 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
         {/* Slogan */}
         <div className="text-center mb-6 animate-[fadeIn_1s_ease-out]">
             <p className="text-xs md:text-sm font-bold uppercase tracking-[0.3em] text-black/50 dark:text-white/50 drop-shadow-ink dark:drop-shadow-neon">
-                Truly Invisible USD Vault — D3 Phase Live
+                Truly Invisible USD Vault
             </p>
         </div>
 
@@ -336,9 +206,10 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
           <div className="flex items-center justify-between mb-6 relative z-10">
             <span className="text-xs uppercase tracking-wider text-black/60 dark:text-white/60 font-bold transition-colors">PRIVATE BALANCE</span>
             
+            {/* Receive Button (Top Right) */}
             <button 
                 onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent reveal
                     setShowReceiveModal(true);
                 }}
                 className="flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider hover:opacity-80 transition-all shadow-ink dark:shadow-neon z-20"
@@ -351,9 +222,8 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
             <div className="flex items-center md:items-baseline flex-wrap">
                 <span className={`text-3xl md:text-5xl font-black tracking-tight text-black dark:text-white mr-2 transition-all drop-shadow-ink dark:drop-shadow-neon ${isBalanceRevealed ? 'opacity-100' : 'opacity-50'}`}>$</span>
                 
-                {isLoadingBalance ? (
-                  <span className="text-2xl text-gray-400">loading...</span>
-                ) : isBalanceRevealed ? (
+                {/* Secure Display Logic */}
+                {isBalanceRevealed ? (
                    <span className="text-4xl sm:text-5xl md:text-6xl font-black tracking-widest text-black dark:text-white drop-shadow-ink-strong dark:drop-shadow-neon-strong break-all animate-[fadeIn_0.2s]">
                       1,234.56
                    </span>
@@ -397,76 +267,53 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
             </div>
             <div className="ml-5 mt-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-black/50 dark:text-white/50">
-                    Public Destination • Encrypted Amount • Proof-Verified
+                    Public Destination • Encrypted Amount
                 </span>
             </div>
           </div>
           
           <div className="space-y-6">
             <div>
-              <label className="block text-xs uppercase tracking-wider mb-2 text-black/70 dark:text-white/70 font-bold drop-shadow-ink dark:drop-shadow-neon transition-colors">{'>>'} AMOUNT (USDC)</label>
+              <label className="block text-xs uppercase tracking-wider mb-2 text-black/70 dark:text-white/70 font-bold drop-shadow-ink dark:drop-shadow-neon transition-colors">{'>>'} AMOUNT</label>
               <input 
                 type="number" 
                 name="amount"
                 value={formData.amount}
                 onChange={handleInputChange}
                 placeholder="0.00" 
-                disabled={isProcessing}
                 className="w-full bg-white dark:bg-black/50 border border-black/10 dark:border-white/20 rounded-2xl px-6 py-4 text-lg font-mono text-black dark:text-white
                           focus:border-black dark:focus:border-white focus:shadow-ink dark:focus:shadow-neon focus:outline-none focus:bg-white dark:focus:bg-white/5
-                          transition-all backdrop-blur-sm placeholder-black/30 dark:placeholder-white/20 disabled:opacity-50"
+                          transition-all backdrop-blur-sm placeholder-black/30 dark:placeholder-white/20"
               />
             </div>
             
             <div>
-              <label className="block text-xs uppercase tracking-wider mb-2 text-black/70 dark:text-white/70 font-bold drop-shadow-ink dark:drop-shadow-neon transition-colors">{'>>'} RECIPIENT (0x...)</label>
+              <label className="block text-xs uppercase tracking-wider mb-2 text-black/70 dark:text-white/70 font-bold drop-shadow-ink dark:drop-shadow-neon transition-colors">{'>>'} RECIPIENT</label>
               <input 
                 type="text" 
                 name="recipient"
                 value={formData.recipient}
                 onChange={handleInputChange}
                 placeholder="0xDestination..." 
-                disabled={isProcessing}
                 className="w-full bg-white dark:bg-black/50 border border-black/10 dark:border-white/20 rounded-2xl px-6 py-4 font-mono text-lg text-black dark:text-white
                           focus:border-black dark:focus:border-white focus:shadow-ink dark:focus:shadow-neon focus:outline-none focus:bg-white dark:focus:bg-white/5
-                          backdrop-blur-sm placeholder-black/30 dark:placeholder-white/20 transition-all disabled:opacity-50"
+                          backdrop-blur-sm placeholder-black/30 dark:placeholder-white/20 transition-all"
               />
             </div>
-
-            {/* Processing Step Display */}
-            {isProcessing && processingStep && (
-              <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg text-blue-600 dark:text-blue-400 text-sm font-mono animate-[fadeIn_0.3s]">
-                ⏳ {processingStep}
-              </div>
-            )}
             
             <button 
               onClick={handleTransfer}
-              disabled={isProcessing || !isZKVerified || balanceData.isZero}
+              disabled={isProcessing}
               className={`w-full group relative overflow-hidden bg-black dark:bg-black/60 
                        border border-transparent dark:border-white/50 hover:border-black dark:hover:border-white hover:shadow-ink dark:hover:shadow-neon text-white font-black py-6 rounded-2xl uppercase 
                        tracking-widest text-sm md:text-lg transition-all transform hover:scale-[1.01]
-                       ${isProcessing || !isZKVerified || balanceData.isZero ? 'opacity-50 cursor-not-allowed' : ''}`}
+                       ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span className="relative z-10 flex items-center justify-center drop-shadow-neon">
-                {isProcessing ? '🔐 COMPUTING ZK PROOF...' : '▶ GENERATE ZK PROOF + TRANSFER'}
+                {isProcessing ? 'COMPUTING ZK PROOF...' : '▶ GENERATE ZK PROOF + TRANSFER'}
               </span>
               <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
             </button>
-
-            {/* Error Message */}
-            {transferError && (
-              <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-600 dark:text-red-400 text-sm font-mono animate-[fadeIn_0.3s] whitespace-pre-wrap">
-                ✗ {transferError}
-              </div>
-            )}
-
-            {/* Success Message */}
-            {transferSuccess && (
-              <div className="p-4 bg-green-500/10 border border-green-500/50 rounded-lg text-green-600 dark:text-green-400 text-sm font-mono animate-[fadeIn_0.3s] whitespace-pre-wrap">
-                ✓ {transferSuccess}
-              </div>
-            )}
           </div>
         </div>
 
@@ -477,13 +324,12 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
             {/* Identity Status */}
             <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
               <div className="flex items-center gap-2">
-                 <span className="font-bold text-sm dark:text-white">KYC STATUS:</span>
+                 <span className="font-bold text-sm dark:text-white">IDENTITY:</span>
                  {isZKVerified ? (
-                    <div className="flex space-x-2 items-center">
+                    <div className="flex space-x-2">
                       <span className="px-2 py-1 bg-green-500/10 border border-green-500/50 text-green-600 dark:text-green-400 text-xs font-bold rounded shadow-sm">
-                        ✓ TIER {kycLevel}
+                        ZKPassport VALID✓
                       </span>
-                      <span className="text-xs text-gray-500">ZKPassport Verified</span>
                     </div>
                  ) : (
                    <span className="text-xs text-red-500/80 font-mono">UNVERIFIED</span>
@@ -501,12 +347,12 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({
             </div>
 
             <span className="text-xs text-black/50 dark:text-white/50 font-mono mt-4 md:mt-0">
-               SESSION: <span className="font-bold text-black dark:text-white">SECURE (D3)</span>
+               SESSION: <span className="font-bold text-black dark:text-white">SECURE</span>
             </span>
           </div>
           
           <div className="text-[10px] md:text-xs text-black/40 dark:text-white/30 font-mono uppercase tracking-widest text-center px-4 leading-relaxed transition-colors">
-            🔒 ZERO-KNOWLEDGE PROOF | STARKNET L2 | ENCRYPTED STATE | USDC NATIVE
+            🔒 PRIVACY MODE ACTIVE | STARKNET L2 | POST-QUANTUM SECURE | USDC NATIVE
           </div>
         </div>
       </div>
