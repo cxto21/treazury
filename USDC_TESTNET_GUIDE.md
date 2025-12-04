@@ -1,73 +1,74 @@
-# 🪙 Testing USDC Nativo en Starknet Sepolia Testnet
+# 🪙 Testing Native USDC on Starknet Sepolia Testnet
 
 ## 📋 Overview
 
-Este guía te mostrará cómo testear soporte completo de USDC nativo en Starknet Sepolia testnet usando Treazury + Tongo SDK.
+This guide shows how to test complete USDC native support on Starknet Sepolia testnet using Treazury + Tongo SDK + AVNU for DEX swaps.
 
-### Estado Actual
-- ✅ **Mainnet**: USDC nativo totalmente soportado
-- ⚠️ **Sepolia**: STRK wrapper (para testnet)
-- 🔄 **Objetivo**: Agregar USDC testnet a Sepolia
+### Current Status
+- ✅ **Mainnet**: Native USDC fully supported
+- ⚠️ **Sepolia**: STRK wrapper (for testnet)
+- 🔄 **Goal**: Add USDC testnet support to Sepolia
 
-### Referencias
+### References
 - [Native USDC Live on Starknet](https://www.starknet.io/blog/native-usdc-live-on-starknet/)
 - [Circle USDC Bridge](https://www.circle.com/usdc)
 - [Starknet Bridge](https://starkgate.starknet.io/)
+- [AVNU DEX Aggregator](https://www.avnu.fi/)
 
 ---
 
-## 🛠️ Step 1: Obtener USDC en Testnet
+## 🛠️ Step 1: Get USDC on Testnet
 
-### Opción A: Bridge desde Ethereum Sepolia (Recomendado)
+### Option A: Bridge from Ethereum Sepolia (Recommended)
 
-**1.1 Consigue ETH en Ethereum Sepolia**
+**1.1 Get ETH on Ethereum Sepolia**
 ```bash
-# Faucet de Alchemy (recomendado)
+# Alchemy Faucet (recommended)
 https://sepoliafaucet.com/
 
-# Faucet de Google Cloud
+# Or Google Cloud Faucet
 https://cloud.google.com/application/web3/faucet/ethereum/sepolia
 ```
 
-**1.2 Swap ETH → USDC en Sepolia**
+**1.2 Swap ETH → USDC on Sepolia**
 ```bash
-# Usa Uniswap Sepolia
+# Use Uniswap Sepolia
 https://app.uniswap.org/
 
-# O directamente menta USDC testnet:
+# Or mint USDC testnet directly:
 # https://sepolia.etherscan.io/token/0x6aed99757d547b8e39cd1cebf11b45ff7e1bfd65
-# (Contrato USDC Test)
+# (USDC Test Contract)
 ```
 
-**1.3 Bridge USDC desde Ethereum Sepolia a Starknet Sepolia**
+**1.3 Bridge USDC from Ethereum Sepolia to Starknet Sepolia**
 ```bash
 # URL: https://starkgate.starknet.io/
-# Selecciona: Ethereum Sepolia → Starknet Sepolia
+# Select: Ethereum Sepolia → Starknet Sepolia
 # Token: USDC
-# Cantidad: 10-100 USDC
-# Espera: ~5-10 minutos
+# Amount: 10-100 USDC
+# Wait: ~5-10 minutes
 ```
 
-**1.4 Verifica tu saldo en Sepolia**
+**1.4 Verify Balance on Sepolia**
 ```bash
-# En tu wallet conectado a Starknet Sepolia
-# Deberías ver USDC en tu balance
+# In your wallet connected to Starknet Sepolia
+# You should see USDC in your balance
 ```
 
-### Opción B: Faucet de Testnet USDC (Si disponible)
+### Option B: Testnet USDC Faucet (If available)
 
 ```bash
-# Algunos proveedores ofrecen USDC testnet directo
+# Some providers offer USDC testnet directly
 # Circle Testnet: https://testnet.circle.com/
 ```
 
 ---
 
-## 🔗 Step 2: Configurar Sepolia USDC Address
+## 🔗 Step 2: Configure Sepolia USDC Address
 
-### 2.1 Actualizar wallet-config.ts
+### 2.1 Update wallet-config.ts
 
-Actualmente Sepolia usa STRK. Agreguemos soporte para USDC testnet:
+Currently Sepolia uses STRK. Add USDC testnet support:
 
 ```typescript
 export const NETWORKS: Record<Network, NetworkConfig> = {
@@ -75,7 +76,7 @@ export const NETWORKS: Record<Network, NetworkConfig> = {
     name: 'Sepolia Testnet',
     rpcUrl: 'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_9/...',
     tongoContractAddress: '0x00b4cca30f0f641e01140c1c388f55641f1c3fe5515484e622b6cb91d8cee585',
-    // Cambia a USDC testnet si disponible
+    // Update to USDC testnet when available
     strkAddress: '0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8', // USDC testnet
     chainId: 'SN_SEPOLIA'
   },
@@ -83,115 +84,174 @@ export const NETWORKS: Record<Network, NetworkConfig> = {
 };
 ```
 
-### 2.2 Direcciones USDC en Starknet
+### 2.2 USDC Addresses on Starknet
 
-| Red | Contrato USDC | Decimales |
-|-----|---------------|-----------|
+| Network | USDC Contract | Decimals |
+|---------|---------------|----------|
 | **Mainnet** | `0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8` | 6 |
-| **Sepolia** | `0x0...` (TBD - esperar a que Circle implemente) | 6 |
+| **Sepolia** | `0x0...` (TBD - awaiting Circle implementation) | 6 |
 | **Testnet Legacy** | STRK wrapper | 18 |
 
 ---
 
-## 🚀 Step 3: Testing Flujo Completo
+## 🔄 Step 3: Tongo Private Fund Flow with AVNU
 
-### 3.1 Connect Wallet
+### 3.1 Complete Flow Architecture
 
-```bash
-# 1. Inicia servidor de desarrollo
-bun run dev:web
-
-# 2. Abre http://localhost:3000
-# 3. Click "Connect Wallet"
-# 4. Selecciona Argent X o Braavos
-# 5. Asegúrate de estar en Starknet Sepolia testnet
+```
+User USDC → Tongo Fund → ZK Proof → Encrypted Balance
+                        ↓
+                  AVNU Swap Available
+                 (STRK ↔ USDC)
 ```
 
-### 3.2 Fund (Depósito)
+### 3.2 Fund Operation
 
 ```typescript
-// En VaultInterface.tsx o Tongo Card
-const amountInUsdc = 10n * 10n ** 6n; // 10 USDC (decimales = 6)
+// In VaultInterface.tsx or Tongo Card
+const amountInUsdc = 10n * 10n ** 6n; // 10 USDC (decimals = 6)
 
 // Flow:
 // 1. User approves USDC to Tongo contract
 // 2. Tongo SDK generates ZK proof of ownership
 // 3. Transaction submitted to blockchain
-// 4. Amount almacenado encriptado en Tongo
+// 4. Amount stored encrypted in Tongo
 ```
 
-**Pasos manuales en wallet:**
+**Manual wallet steps:**
 ```
-1. Click "Fund" en Tongo Card
-2. Ingresa amount: 10
+1. Click "Fund" in Tongo Card
+2. Enter amount: 10
 3. Click "Approve USDC"
-4. Aprueba en wallet extension
-5. Click "Fund" nuevamente
-6. Aprueba transacción en wallet
-7. Espera confirmación (~30-60s)
+4. Approve in wallet extension
+5. Click "Fund" again
+6. Approve transaction in wallet
+7. Wait for confirmation (~30-60s)
 ```
 
-### 3.3 Verificar Transacción
+### 3.3 Verify Transaction
 
 ```bash
-# En Starkscan Sepolia
+# On Starkscan Sepolia
 https://sepolia.starkscan.io/
 
-# Busca tu wallet address
-# Deberías ver:
+# Search your wallet address
+# You should see:
 # 1. Approval tx (USDC transfer approval)
 # 2. Fund tx (Tongo.fund call)
 ```
 
-### 3.4 Transfer (Transferencia encriptada)
+### 3.4 Transfer Flow (Encrypted)
 
-```typescript
-// Para testear transfer entre cuentas
-const recipientAddress = '0x...'; // Otra wallet Sepolia
-const amount = 5n * 10n ** 6n; // 5 USDC
-
-// Tongo SDK genera proof y transfiere de forma encriptada
-// Verificable solo con private key de Tongo
+```
+Encrypted Balance → [Transfer] → Recipient Encrypted
+                   1 tx with ZK proof
 ```
 
-### 3.5 Withdraw (Retiro)
+### 3.5 Withdraw Flow
 
-```typescript
-// Extrae USDC del Tongo vault al Starknet
-const withdrawAmount = 5n * 10n ** 6n;
-
-// Flow:
-// 1. Genera proof de ownership
-// 2. Descifra balance
-// 3. Transfiere a wallet address
-// 4. Actualiza balance encriptado
+```
+Encrypted Balance → [Withdraw] → User USDC
+                   1 tx
 ```
 
 ---
 
-## 🧪 Step 4: CLI Testing (Para desarrolladores)
+## 💱 Step 4: AVNU Swap Integration (Native Starknet DEX)
 
-### 4.1 Setup .env
+### 4.1 Why AVNU?
+
+- **Native Starknet DEX Aggregator**: Best rates across all Starknet DEXes
+- **STRK ↔ USDC Swaps**: Essential for mainnet donation flow
+- **Low Fees**: Direct contract interaction
+- **No Bridge Needed**: Works directly on Starknet
+- **Liquidity**: Access to Ekubo, Jediswap, SithSwap, 10k Swap pools
+
+### 4.2 AVNU Setup (Already Integrated)
+
+```typescript
+// avnu-service.ts - Already configured
+import { getSwapQuote, buildSwapTransaction } from './avnu-service';
+
+// Get quote for STRK → USDC on mainnet
+const { quote } = await getSwapQuote(
+  MAINNET_TOKENS.STRK,
+  MAINNET_TOKENS.USDC,
+  strkAmount,
+  takerAddress
+);
+
+// Build transaction
+const { calls } = await buildSwapTransaction(quote.quoteId, takerAddress, 0.01);
+```
+
+### 4.3 Complete STRK → USDC → Donation Flow
+
+```typescript
+// Step-by-step flow using AVNU on mainnet
+
+// 1. Get STRK balance
+const strkBalance = await getStrkBalance(userAddress);
+
+// 2. Get AVNU quote for best rate
+const { quote, usdcAmount } = await getStrkToUsdcQuote(
+  strkBalance,
+  userAddress,
+  { slippage: 0.01 } // 1% slippage tolerance
+);
+
+// 3. Build AVNU swap transaction
+const swapCalls = await buildStrkToUsdcSwap(
+  strkBalance,
+  userAddress,
+  0.01
+);
+
+// 4. Execute swap
+await wallet.account.execute(swapCalls);
+
+// 5. Fund Tongo with resulting USDC
+await tongoService.fundDonationAccount(usdcAmount);
+
+// Now user can fund, transfer, and withdraw USDC privately!
+```
+
+### 4.4 Test AVNU on Mainnet (After Sepolia Works)
+
+```bash
+# 1. Get STRK on mainnet (from exchange or earned via activity)
+# 2. Use AVNU to swap STRK → USDC
+# 3. Compare rates vs direct bridge cost
+# 4. Verify USDC received correctly
+# 5. Fund donation account with swapped USDC
+```
+
+---
+
+## 🧪 Step 5: CLI Testing (For Developers)
+
+### 5.1 Setup .env
 
 ```bash
 cp .env.example .env
 
-# Setea variables
+# Set variables
 STARKNET_RPC_URL=https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_9/YOUR_KEY
-STARKNET_ACCOUNT_ADDRESS=0x...  # Tu wallet Sepolia
-STARKNET_PRIVATE_KEY=0x...       # Tu private key (¡SEGURA!)
+STARKNET_ACCOUNT_ADDRESS=0x...  # Your Sepolia wallet
+STARKNET_PRIVATE_KEY=0x...       # Your private key (KEEP SAFE!)
 STARKNET_NETWORK=sepolia
 TONGO_CONTRACT_ADDRESS=0x00b4cca30f0f641e01140c1c388f55641f1c3fe5515484e622b6cb91d8cee585
 USDC_ADDRESS=0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
+AVNU_API_URL=https://api.avnu.fi/v1  # AVNU API (optional for quotes)
 ```
 
-### 4.2 Run CLI Demo
+### 5.2 Run CLI Demo
 
 ```bash
 # Full USDC testnet flow
 bun run demo
 
-# Output esperado:
+# Expected output:
 # [CLI] Connecting to Starknet Sepolia...
 # [CLI] Account: 0x...
 # [CLI] Balance: X USDC
@@ -204,7 +264,7 @@ bun run demo
 # [Transaction Hash: 0x...]
 ```
 
-### 4.3 Llamadas RPC Manuales
+### 5.3 Manual RPC Calls
 
 ```bash
 # 1. Check USDC balance
@@ -226,9 +286,25 @@ cast send 0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8 \
   --rpc-url https://starknet-sepolia.g.alchemy.com/...
 ```
 
+### 5.4 Test AVNU Integration (On Mainnet)
+
+```bash
+# Get AVNU quote for STRK → USDC
+curl https://api.avnu.fi/v1/quotes \
+  -X GET \
+  -G \
+  --data-urlencode 'sellTokenAddress=0x04718f5a...' \
+  --data-urlencode 'buyTokenAddress=0x053c91...' \
+  --data-urlencode 'sellAmount=1000000000000000000' \
+  --data-urlencode 'takerAddress=0x...YOUR_ADDRESS'
+
+# Build and execute swap
+bun run build-swap --swap-quote '<quote_id>'
+```
+
 ---
 
-## 📊 Testing Checklist
+## 📊 Complete Testing Checklist
 
 - [ ] **Wallet Connection**
   - [ ] Connect Argent X to Sepolia
@@ -258,6 +334,11 @@ cast send 0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8 \
   - [ ] Verify balance in wallet
   - [ ] Check transaction on Starkscan
 
+- [ ] **AVNU Integration (Mainnet)**
+  - [ ] Get AVNU quote STRK → USDC
+  - [ ] Build and execute swap
+  - [ ] Verify received USDC
+
 - [ ] **Edge Cases**
   - [ ] Insufficient USDC balance
   - [ ] Insufficient STRK for gas
@@ -272,14 +353,14 @@ cast send 0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8 \
 ### Issue: "USDC Address not found"
 
 ```typescript
-// Verifica que el address correcto esté en wallet-config.ts
+// Verify correct address in wallet-config.ts
 console.log('USDC Address:', NETWORKS.sepolia.strkAddress);
 
-// Alterna: Agrega selector de token dinámico
+// Alternative: Add dynamic token selector
 const TOKENS = {
   sepolia: {
-    usdc: '0x...', // Cuando disponible
-    strk: '0x04718f5a...' // Fallback para testnet
+    usdc: '0x...', // When available
+    strk: '0x04718f5a...' // Fallback for testnet
   }
 };
 ```
@@ -287,48 +368,67 @@ const TOKENS = {
 ### Issue: "Insufficient balance for approval"
 
 ```bash
-# 1. Verifica que tengas USDC en tu wallet
-# 2. Asegúrate de tener STRK para gas fees
-# 3. Solicita ambos en faucet
+# 1. Verify you have USDC in your wallet
+# 2. Ensure you have STRK for gas fees
+# 3. Request both from faucet
 ```
 
 ### Issue: "Tongo contract not found"
 
 ```typescript
-// Verifica dirección del contrato
+// Verify contract address
 const contractAddress = NETWORKS.sepolia.tongoContractAddress;
 console.log('Tongo Contract:', contractAddress);
 
-// Si no existe, deploy test contract
+// If not exists, deploy test contract
 sncast --profile sepolia deploy --contract-name TongoTest
 ```
 
 ### Issue: "Transaction rejected by wallet"
 
 ```
-1. Verifica el network está correcto (Sepolia)
-2. Valida la dirección del recipient
-3. Confirma que aprobaste el token antes
-4. Intenta con menor cantidad primero
+1. Verify network is correct (Sepolia)
+2. Validate recipient address
+3. Confirm you approved token before
+4. Try with smaller amount first
+```
+
+### Issue: "AVNU Quote Failed"
+
+```typescript
+// Verify AVNU service is accessible
+// Check API response for slippage errors
+const quote = await getSwapQuote(
+  STRK_TOKEN,
+  USDC_TOKEN,
+  amount,
+  userAddress
+);
+
+if (!quote.success) {
+  console.error('AVNU Error:', quote.error);
+  // May need higher slippage tolerance
+}
 ```
 
 ---
 
 ## 📈 Performance Benchmarks
 
-| Operación | Tiempo | Gas (STRK) | Notas |
-|-----------|--------|-----------|-------|
+| Operation | Time | Gas (STRK) | Notes |
+|-----------|------|-----------|-------|
 | Connect Wallet | 1-2s | 0 | Local |
 | Fund (Approve) | 10-15s | 0.001 | 1 tx |
 | Fund (Deposit) | 10-15s | 0.002 | 1 tx |
 | Transfer | 10-15s | 0.002 | ZK proof gen: ~2s |
 | Withdraw | 10-15s | 0.002 | 1 tx |
+| AVNU Swap | 15-20s | 0.003 | STRK ↔ USDC |
 
 ---
 
-## 🚢 Migration a Mainnet
+## 🚢 Migration to Mainnet
 
-Una vez testeado en Sepolia, para migrar a mainnet:
+Once tested on Sepolia:
 
 ### 1. Update wallet-config.ts
 
@@ -342,10 +442,10 @@ mainnet: {
 }
 ```
 
-### 2. Obtener USDC Mainnet
+### 2. Get USDC Mainnet
 
 ```bash
-# Bridge desde Ethereum Mainnet
+# Bridge from Ethereum Mainnet
 # https://starkgate.starknet.io/
 # ETH Mainnet → Starknet Mainnet
 # USDC (Ethereum) → USDC (Starknet)
@@ -365,6 +465,9 @@ mainnet: {
     "usdc": {
       "address": "0x053c91...",
       "notes": "Native Circle USDC"
+    },
+    "avnu": {
+      "notes": "DEX aggregator for STRK ↔ USDC swaps"
     }
   }
 }
@@ -372,14 +475,16 @@ mainnet: {
 
 ---
 
-## 📚 Referencias Útiles
+## 📚 Useful References
 
 - [Starknet Native USDC Blog](https://www.starknet.io/blog/native-usdc-live-on-starknet/)
 - [Starkgate Bridge](https://starkgate.starknet.io/)
 - [Tongo SDK Docs](https://github.com/omarespejel/tongo-sdk)
+- [AVNU DEX Aggregator](https://www.avnu.fi/)
 - [Starkscan Sepolia Explorer](https://sepolia.starkscan.io/)
 - [Starknet Sepolia RPC](https://starknet-sepolia.public.blastapi.io)
 - [Circle USDC Cross-Chain](https://www.circle.com/usdc)
+- [Starknet Docs](https://docs.starknet.io/)
 
 ---
 
@@ -387,30 +492,66 @@ mainnet: {
 
 ### Never
 
-- ❌ Commit `.env` con private keys
-- ❌ Share private keys en logs o console
-- ❌ Use production keys para testing
-- ❌ Deploy sin auditar contratos
+- ❌ Commit `.env` with private keys
+- ❌ Share private keys in logs or console
+- ❌ Use production keys for testing
+- ❌ Deploy without contract audits
 
 ### Always
 
-- ✅ Use testnets para development
-- ✅ Rotate keys después de testing
-- ✅ Validate addresses antes de transferencias
-- ✅ Test con cantidades pequeñas primero
-- ✅ Mantén backups seguros de private keys
+- ✅ Use testnets for development
+- ✅ Rotate keys after testing
+- ✅ Validate addresses before transfers
+- ✅ Test with small amounts first
+- ✅ Keep secure backups of private keys
+- ✅ Monitor AVNU slippage settings
 
 ---
 
 ## 📞 Support
 
-Si encuentras issues:
+If you encounter issues:
 
 1. Check [GitHub Issues](https://github.com/cxto21/treazury/issues)
 2. Review [Starknet Docs](https://docs.starknet.io/)
 3. Ask in [Starknet Discord](https://discord.gg/starknet)
-4. Create detailed bug report con:
+4. Create detailed bug report with:
    - Network (Sepolia/Mainnet)
    - Wallet (Argent/Braavos)
-   - Error message completo
-   - Transaction hash (si aplicable)
+   - Complete error message
+   - Transaction hash (if applicable)
+   - Screenshots
+
+---
+
+## 📊 Advanced: AVNU Mainnet Flow
+
+### Complete STRK → USDC Flow on Mainnet
+
+```typescript
+// 1. Get STRK balance
+const strkBalance = await getStrkBalance(userAddress);
+
+// 2. Get AVNU quote
+const { quote, usdcAmount } = await getStrkToUsdcQuote(
+  strkBalance,
+  userAddress
+);
+
+// 3. Execute swap
+const swapCalls = await buildStrkToUsdcSwap(
+  strkBalance,
+  userAddress,
+  0.01 // 1% slippage
+);
+
+// 4. Send transaction
+await wallet.account.execute(swapCalls);
+
+// 5. Fund Tongo with resulting USDC
+await tongoService.fundDonationAccount(usdcAmount);
+```
+
+---
+
+✅ **Ready to test USDC on Starknet!** 🚀

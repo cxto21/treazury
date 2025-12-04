@@ -1,47 +1,47 @@
-# USDC Testnet - Quick Start Guide
+# USDC Testnet - 5-Minute Quick Start
 
-## 🎯 Lo que necesitas hacer EN 5 MINUTOS
+## 🎯 What You Need to Do in 5 MINUTES
 
-### Fase 1: Setup (2 min)
+### Phase 1: Setup (2 min)
 
 ```bash
-# 1. Crea wallet en Sepolia (si no tienes)
-# → https://www.argent.xyz o https://www.braavos.app/
+# 1. Create wallet on Sepolia (if you don't have one)
+# → https://www.argent.xyz or https://www.braavos.app/
 
-# 2. Obtén ETH en Sepolia
+# 2. Get ETH on Sepolia
 # → https://sepoliafaucet.com
 
-# 3. Swapea ETH → USDC en Uniswap Sepolia
-# → https://app.uniswap.org (cambiar a Sepolia testnet)
+# 3. Swap ETH → USDC on Uniswap Sepolia
+# → https://app.uniswap.org (switch to Sepolia testnet)
 
-# 4. Bridge USDC a Starknet Sepolia
+# 4. Bridge USDC to Starknet Sepolia
 # → https://starkgate.starknet.io/
 # Select: Ethereum Sepolia → Starknet Sepolia
 ```
 
-### Fase 2: Testing (3 min)
+### Phase 2: Testing (3 min)
 
 ```bash
-# 1. Inicia Treazury
+# 1. Start Treazury
 bun run dev:web
 
-# 2. Abre http://localhost:3000
+# 2. Open http://localhost:3000
 
-# 3. Connect wallet → Argent X o Braavos
+# 3. Connect wallet → Argent X or Braavos
 
-# 4. Verifica que ves USDC en el balance
+# 4. Verify USDC balance is visible
 
-# 5. Prueba el Fund flow:
-#    Click "Fund" → "Approve USDC" → Confirmar en wallet
-#    Click "Fund again" → Confirmar en wallet
-#    Ver transacción en Starkscan Sepolia
+# 5. Test the Fund flow:
+#    Click "Fund" → "Approve USDC" → Confirm in wallet
+#    Click "Fund again" → Confirm in wallet
+#    View transaction on Starkscan Sepolia
 ```
 
 ---
 
-## 📊 ¿QUÉ BUSCAR EN CADA PANTALLA?
+## 📊 What to Look for on Each Screen
 
-### Pantalla Principal
+### Main Screen
 
 ```
 ┌─────────────────────────────────────┐
@@ -51,10 +51,10 @@ bun run dev:web
 └─────────────────────────────────────┘
 ```
 
-**✅ Verde = Correcto**
-- Red selection: "Sepolia Testnet"
-- Balance muestra número (cualquier cantidad de USDC)
-- Status dice "Connected"
+**✅ Green = Correct**
+- Network selector: "Sepolia Testnet"
+- Balance shows a number (any amount of USDC)
+- Status says "Connected"
 
 ### Tongo Card
 
@@ -69,225 +69,225 @@ bun run dev:web
 └─────────────────────────────────────┘
 ```
 
-**✅ Verde = Correcto**
-- Buttons habilitados (no grayed out)
-- Status dice "Ready"
-- Available amount es positivo
+**✅ Green = Correct**
+- Buttons are enabled (not grayed out)
+- Status says "Ready"
+- Available amount is positive
 
 ---
 
-## 🔄 FLUJO PASO A PASO
+## 🔄 Step-by-Step Flows
 
-### Flow 1: FUND (Depósito)
+### Flow 1: FUND (Deposit)
 
 ```
 1. Click [Fund] button
    ↓
-2. Ingresa "10" (o cualquier cantidad)
+2. Enter "10" (or any amount)
    ↓
 3. Click "Approve USDC"
    ↓
 4. Wallet extension popup
    → Click "Approve"
    ↓
-5. Espera 20-30 segundos
+5. Wait 20-30 seconds
    ↓
-6. Click "Fund" nuevamente
+6. Click "Fund" again
    ↓
 7. Wallet extension popup
    → Click "Confirm"
    ↓
-8. Espera 30-60 segundos
+8. Wait 30-60 seconds
    ↓
-✅ Ver "Fund successful!"
+✅ See "Fund successful!"
    → Tx Hash: 0x...
 ```
 
-**Verificar en Starkscan:**
+**Verify on Starkscan:**
 ```
 https://sepolia.starkscan.io/
 
-1. Busca tu wallet address (arriba derecha)
-2. Deberías ver:
-   - 1 tx de Approval (USDC approve)
-   - 1 tx de Fund (Tongo.fund call)
-3. Click en cada una para detalles
+1. Search your wallet address (top right)
+2. You should see:
+   - 1 Approval tx (USDC approve)
+   - 1 Fund tx (Tongo.fund call)
+3. Click each one for details
 ```
 
 ---
 
-### Flow 2: TRANSFER (Transferencia encriptada)
+### Flow 2: TRANSFER (Encrypted Transfer)
 
 ```
 1. Click [Transfer] button
    ↓
-2. Ingresa recipient address (otra wallet Sepolia)
+2. Enter recipient address (another Sepolia wallet)
    ↓
-3. Ingresa cantidad (ej: 5 USDC)
+3. Enter amount (ex: 5 USDC)
    ↓
 4. Click "Transfer"
    ↓
 5. Wallet extension popup
    → Click "Confirm"
    ↓
-6. Espera 30-60 segundos
+6. Wait 30-60 seconds
    ↓
-✅ Ver "Transfer successful!"
+✅ See "Transfer successful!"
    → Tx Hash: 0x...
-   → 5 USDC enviados de forma encriptada
+   → 5 USDC sent encrypted
 ```
 
-**Nota:** El recipient NO VE el monto en cadena (encriptado con Tongo)
+**Note:** The recipient CANNOT see the amount on-chain (encrypted with Tongo)
 
 ---
 
-### Flow 3: WITHDRAW (Retiro)
+### Flow 3: WITHDRAW (Withdrawal)
 
 ```
 1. Click [Withdraw] button
    ↓
-2. Ingresa cantidad (ej: 5 USDC)
+2. Enter amount (ex: 5 USDC)
    ↓
 3. Click "Withdraw"
    ↓
 4. Wallet extension popup
    → Click "Confirm"
    ↓
-5. Espera 30-60 segundos
+5. Wait 30-60 seconds
    ↓
-✅ Ver "Withdraw successful!"
+✅ See "Withdraw successful!"
    → Tx Hash: 0x...
-   → 5 USDC enviados a tu wallet
+   → 5 USDC sent to your wallet
 ```
 
-**Verificar:** Chequea el balance en tu wallet después
+**Verify:** Check balance in your wallet afterwards
 
 ---
 
-## 🐛 TROUBLESHOOTING RÁPIDO
+## 🐛 Quick Troubleshooting
 
 ### ❌ "No USDC balance"
 
-**Solución:**
-1. ¿Bridgeaste USDC a Starknet Sepolia?
-   → Si no: Haz bridge desde Ethereum Sepolia
-2. ¿Está tu wallet conectada?
-   → Click [Connect] nuevamente
-3. ¿Estás en Sepolia?
-   → Switch a "Starknet Sepolia" en selector
+**Fix:**
+1. Did you bridge USDC to Starknet Sepolia?
+   → If not: Do bridge from Ethereum Sepolia
+2. Is your wallet connected?
+   → Click [Connect] again
+3. Are you on Sepolia?
+   → Switch to "Starknet Sepolia" in selector
 
 ---
 
 ### ❌ "Insufficient STRK for gas"
 
-**Solución:**
-1. Necesitas STRK para pagar gas fees
-2. Obtén STRK en https://www.starkgate.io/
-   O solicita en Starknet faucet
-3. Mínimo recomendado: 0.01 STRK
+**Fix:**
+1. You need STRK to pay gas fees
+2. Get STRK at https://www.starkgate.io/
+   Or request from Starknet faucet
+3. Recommended minimum: 0.01 STRK
 
 ---
 
 ### ❌ "Approve failed"
 
-**Solución:**
-1. Verifica que tienes USDC balance
-2. Chequea que tienes STRK para gas
-3. Intenta nuevamente
-4. Si persiste: Revisit USDC_TESTNET_GUIDE.md
+**Fix:**
+1. Verify you have USDC balance
+2. Check you have STRK for gas
+3. Try again
+4. If persists: See USDC_TESTNET_GUIDE.md
 
 ---
 
 ### ❌ "Transfer/Fund times out"
 
-**Solución:**
-1. Espera unos minutos más
-2. Chequea en Starkscan si la tx se envió
-3. Si no aparece: Intenta con cantidad menor
-4. Revisa que no haya network issues
+**Fix:**
+1. Wait a few more minutes
+2. Check Starkscan if tx was sent
+3. If not shown: Try with smaller amount
+4. Verify no network issues
 
 ---
 
-## ✅ ÉXITO = QUÉ SIGNIFICA
+## ✅ Success = What It Looks Like
 
 ```
-✅ TODO está funcionando si ves:
+✅ EVERYTHING works if you see:
 
-1. Wallet conectada a Sepolia
+1. Wallet connected to Sepolia
 2. USDC balance visible
-3. Tongo card con status "Ready"
-4. Puedes ejecutar Fund
-5. Transacción aparece en Starkscan
-6. Balance se actualiza después
-7. Puedes hacer Transfer
-8. Puedes hacer Withdraw
-9. Todos los balances cuadran
+3. Tongo card status "Ready"
+4. Can execute Fund
+5. Transaction appears on Starkscan
+6. Balance updates after
+7. Can do Transfer
+8. Can do Withdraw
+9. All balances match
 ```
 
 ---
 
-## 📊 CHECKPOINTS
+## 📊 Verification Checklist
 
-Marca conforme completes:
+Mark as you complete:
 
-- [ ] Wallet conectada a Sepolia
-- [ ] Tengo USDC balance
-- [ ] Tengo STRK para gas
-- [ ] Ví el Fund flow completo
-- [ ] Transacción en Starkscan
-- [ ] Transfer funcionó
-- [ ] Withdraw funcionó
-- [ ] Todos los balances correctos
+- [ ] Wallet connected to Sepolia
+- [ ] Have USDC balance
+- [ ] Have STRK for gas
+- [ ] Saw complete Fund flow
+- [ ] Transaction on Starkscan
+- [ ] Transfer worked
+- [ ] Withdraw worked
+- [ ] All balances correct
 
 ---
 
-## 🎬 SIGUIENTE PASO
+## 🎬 Next Steps
 
-Cuando TODO funcione:
+When EVERYTHING works:
 
 ```bash
-# 1. Documenta qué funcionó/qué falló
-# 2. Crea issue/pull request en GitHub
-# 3. Comparte logs y tx hashes si hay problemas
+# 1. Document what worked/what failed
+# 2. Create GitHub issue/PR
+# 3. Share logs and tx hashes if issues
 
-# La info que necesitamos:
+# Info we need:
 - Network (Sepolia)
 - Wallet (Argent X / Braavos)
-- Transacciones que ejecutaste
-- Errors específicos (si los hay)
-- Screenshots del flow
+- Transactions executed
+- Specific errors (if any)
+- Screenshots of flows
 ```
 
 ---
 
-## 🚀 PRÓXIMO: MAINNET
+## 🚀 Next: MAINNET
 
-Cuando Sepolia esté 100% funcionando:
+When Sepolia is 100% working:
 
 ```bash
-# 1. Switch a Mainnet
-# 2. Bridge USDC real desde Ethereum Mainnet
-# 3. Repite todos los tests
-# 4. Monitorea costos de gas reales
+# 1. Switch to Mainnet
+# 2. Bridge real USDC from Ethereum Mainnet
+# 3. Repeat all tests
+# 4. Monitor real gas costs
 
 ⚠️ MAINNET = REAL MONEY
-   Testa con cantidades PEQUEÑAS primero
+   Test with SMALL amounts first
 ```
 
 ---
 
-## 📞 AYUDA
+## 📞 Support
 
-Si algo no funciona:
+If something doesn't work:
 
-1. **Lee los logs en console** (`F12` → Console tab)
-2. **Busca en USDC_TESTNET_GUIDE.md**
-3. **Check Starkscan** para ver si la tx llegó
-4. **Reinicia el servidor** (`bun run dev:web`)
-5. **Ask en Starknet Discord**
+1. **Check browser console** (`F12` → Console tab)
+2. **Read USDC_TESTNET_GUIDE.md**
+3. **Check Starkscan** to see if tx arrived
+4. **Restart server** (`bun run dev:web`)
+5. **Ask in Starknet Discord**
 
 ---
 
-⏱️ **Tiempo total:** ~5 minutos para setup + 5 minutos por flow = 15 minutos total
+⏱️ **Total time:** ~5 min setup + 5 min per flow = 15 min total
 
-¡Listo para testear! 🚀
+Ready to test! 🚀
