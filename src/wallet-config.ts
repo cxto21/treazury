@@ -1,5 +1,7 @@
 import { RpcProvider, Account } from 'starknet';
 import { connect, disconnect } from 'starknetkit';
+import { ArgentX } from 'starknetkit/argentX';
+import { Braavos } from 'starknetkit/braavos';
 
 /**
  * Network configuration for Starknet
@@ -56,25 +58,6 @@ export function createProvider(network: Network = 'mainnet'): RpcProvider {
 }
 
 /**
- * Normalizar nombre de wallet para mostrar correctamente
- * get-starknet-core devuelve nombres normalizados
- */
-function normalizeWalletName(wallet: any): string {
-  if (!wallet) return 'Unknown';
-  
-  const name = wallet.name?.toLowerCase() || '';
-  const id = wallet.id?.toLowerCase() || '';
-  
-  // Mapear nombres y IDs a nombres amigables
-  if (name.includes('argent') || id.includes('argent')) return 'Argent X';
-  if (name.includes('braavos') || id.includes('braavos')) return 'Braavos';
-  if (name.includes('webwallet') || name.includes('web')) return 'Argent Webwallet';
-  
-  // Return original name if no match
-  return wallet.name || 'Unknown';
-}
-
-/**
  * Browser-only: Connect to Starknet wallet
  * Returns Account if connected, null if cancelled
  */
@@ -96,8 +79,13 @@ export async function connectWallet(): Promise<Account | null> {
     }
     
     // Use starknetkit's connect - it has the visual modal with wallet detection
-    const result = await Promise.race([
-      connect(),
+      const result = await Promise.race([
+      connect({
+        modalMode: 'alwaysAsk',
+        modalTheme: 'system',
+        connectors: [new ArgentX(), new Braavos()],
+        dappName: 'Treazury'
+      }),
       new Promise<never>((_, reject) =>
         setTimeout(
           () => reject(new Error('Wallet connection timeout - try again or use a different wallet')),
@@ -106,13 +94,9 @@ export async function connectWallet(): Promise<Account | null> {
       ),
     ]);
 
-    console.log('[wallet-config] Connection result:', {
-      id: result?.id,
-      name: result?.name,
-      isConnected: result?.isConnected,
-    });
+    console.log('[wallet-config] Connection result:', result);
 
-    if (!result) {
+    if (!result || !result.wallet) {
       console.log('[wallet-config] User cancelled wallet connection');
       if (statusEl) {
         statusEl.textContent = 'Connection cancelled';
@@ -121,26 +105,28 @@ export async function connectWallet(): Promise<Account | null> {
       return null;
     }
 
+    const { wallet } = result;
+
     // Enable wallet if not already connected
-    if (!result.isConnected) {
+    if (!wallet.isConnected) {
       console.log('[wallet-config] Wallet not connected, enabling...');
       try {
-        await result.enable();
+        await wallet.enable({ starknetVersion: 'v5' });
       } catch (enableError) {
         console.warn('[wallet-config] Enable error (might be already connected):', enableError);
       }
     }
 
-    if (!result.account) {
+    if (!wallet.account) {
       throw new Error('Wallet account not available after connection');
     }
 
-    const walletName = normalizeWalletName(result);
+    const walletName = wallet.name || wallet.id || 'Unknown Wallet';
     
     console.log('[wallet-config] ✅ Wallet connected successfully:', {
       name: walletName,
-      address: result.account.address,
-      id: result.id,
+      address: wallet.account.address,
+      id: wallet.id,
     });
     
     if (statusEl) {
@@ -148,7 +134,7 @@ export async function connectWallet(): Promise<Account | null> {
       statusEl.className = 'status success';
     }
     
-    return result.account as Account;
+    return wallet.account as Account;
   } catch (error) {
     console.error('[wallet-config] Wallet connection error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

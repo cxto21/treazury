@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
-import { connect, disconnect } from 'starknetkit';
+import React, { useEffect } from 'react';
+import { connect } from 'starknetkit';
+import { ArgentX } from 'starknetkit/argentX';
+import { Braavos } from 'starknetkit/braavos';
 import type { StarknetWindowObject } from '@starknet-io/types-js';
 
 interface ConnectWalletModalProps {
@@ -8,85 +10,40 @@ interface ConnectWalletModalProps {
 }
 
 const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) => {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    // Auto-trigger wallet connection modal on mount
+    handleConnect();
+  }, []);
 
-  const handleConnect = async (walletId?: string) => {
-    setIsConnecting(true);
-    setError(null);
-    
+  const handleConnect = async () => {
     try {
-      const { wallet } = await connect({
-        modalMode: "neverAsk",
-        modalTheme: "dark",
-        webWalletUrl: "https://web.argent.xyz",
-        argentMobileOptions: {
-          dappName: "Treazury",
-          url: window.location.hostname,
-        },
-        ...(walletId && { 
-          connectors: walletId === 'argentX' 
-            ? ['argentX'] 
-            : walletId === 'braavos' 
-            ? ['braavos'] 
-            : undefined 
-        })
-      });
-      
-      if (!wallet) {
-        throw new Error('No wallet found. Please install Argent X or Braavos.');
-      }
-
-      // Enable wallet
-      await wallet.enable({ starknetVersion: "v5" });
-      
-      if (!wallet.isConnected) {
-        throw new Error('Failed to connect to wallet');
-      }
-
-      // Wait a moment for connection to stabilize
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      onConnected(wallet);
-    } catch (err) {
-      console.error('Wallet connection error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to connect wallet');
-      setIsConnecting(false);
-    }
-  };
-
-  const handleConnectAny = async () => {
-    setIsConnecting(true);
-    setError(null);
-    
-    try {
+      // Use starknetkit 3.4.0 with explicit connectors
       const { wallet } = await connect({
         modalMode: "alwaysAsk",
-        modalTheme: "dark",
-        webWalletUrl: "https://web.argent.xyz",
-        argentMobileOptions: {
-          dappName: "Treazury",
-          url: window.location.hostname,
-        }
+        modalTheme: "system",
+        connectors: [new ArgentX(), new Braavos()],
+        dappName: "Treazury"
       });
       
       if (!wallet) {
-        throw new Error('No wallet selected');
+        return;
       }
 
-      await wallet.enable({ starknetVersion: "v5" });
+      // Enable the wallet
+      if (!wallet.isConnected) {
+        await wallet.enable({ starknetVersion: "v5" });
+      }
       
       if (!wallet.isConnected) {
         throw new Error('Failed to connect to wallet');
       }
-
+      
+      // Wait for connection to stabilize
       await new Promise(resolve => setTimeout(resolve, 500));
       
       onConnected(wallet);
     } catch (err) {
       console.error('Wallet connection error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to connect wallet');
-      setIsConnecting(false);
     }
   };
 
@@ -100,57 +57,26 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) 
             Connect Wallet
           </h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-            Select a Starknet wallet to access Treazury
+            Wallet modal should appear automatically
           </p>
-          {error && (
-            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-600 dark:text-red-400 text-xs">
-              {error}
-            </div>
-          )}
         </div>
 
-        {/* Wallet Options */}
+        {/* Retry Button */}
         <div className="space-y-4">
           <button 
-            onClick={() => handleConnect('argentX')}
-            disabled={isConnecting}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleConnect}
+            className="w-full flex items-center justify-center p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group"
           >
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold">A</div>
-              <span className="font-bold text-black dark:text-white group-hover:drop-shadow-ink dark:group-hover:drop-shadow-neon">Argent X</span>
-            </div>
-            {isConnecting && <div className="w-4 h-4 border-2 border-black dark:border-white border-t-transparent rounded-full animate-spin"></div>}
-          </button>
-
-          <button 
-            onClick={() => handleConnect('braavos')}
-            disabled={isConnecting}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">B</div>
-              <span className="font-bold text-black dark:text-white group-hover:drop-shadow-ink dark:group-hover:drop-shadow-neon">Braavos</span>
-            </div>
-          </button>
-          
-          <button 
-            onClick={() => handleConnect()}
-            disabled={isConnecting}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-white font-bold">?</div>
-              <span className="font-bold text-black dark:text-white group-hover:drop-shadow-ink dark:group-hover:drop-shadow-neon">Auto-detect</span>
-            </div>
-             <span className="text-[10px] uppercase tracking-wider bg-black/10 dark:bg-white/20 px-2 py-1 rounded text-black dark:text-white">Any Wallet</span>
+            <span className="font-bold text-black dark:text-white group-hover:drop-shadow-ink dark:group-hover:drop-shadow-neon">
+              Open Wallet Modal
+            </span>
           </button>
         </div>
 
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-[10px] text-gray-400 uppercase tracking-widest">
-            Powered by StarknetKit
+            get-starknet-core
           </p>
         </div>
 
