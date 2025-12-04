@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import type { StarknetWindowObject } from 'get-starknet-core';
 import { TransferFormState, Theme } from '../types';
 import ZKPassportModal from './ZKPassportModal';
+import { getEncryptedBalance, transfer, isVaultPaused, formatUSDC } from '../vault-service';
 
 interface VaultInterfaceProps {
   theme: Theme;
@@ -21,6 +22,11 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
   const [showZKModal, setShowZKModal] = useState(false);
   const [isZKVerified, setIsZKVerified] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [balance, setBalance] = useState<string>('******');
+  const [balanceCommitment, setBalanceCommitment] = useState<string>('0x0');
+  const [vaultPaused, setVaultPaused] = useState(false);
+  const [txStatus, setTxStatus] = useState<string | null>(null);
+  const [txError, setTxError] = useState<string | null>(null);
   
   // Wallet Interaction States - Extract from connected wallet
   const [walletAddress, setWalletAddress] = useState("");
@@ -33,26 +39,100 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
       // Show abbreviated version
       const addr = wallet.selectedAddress;
       setWalletAddress(`${addr.slice(0, 6)}...${addr.slice(-4)}`);
+      
+      // Load vault data
+      loadVaultData(addr);
     }
   }, [wallet]);
+
+  // Load balance and vault status
+  const loadVaultData = async (address: string) => {
+    try {
+      // Check if vault is paused
+      const paused = await isVaultPaused();
+      setVaultPaused(paused);
+
+      // Get encrypted balance
+      const balanceData = await getEncryptedBalance(address);
+      setBalanceCommitment(balanceData.commitment);
+      
+      // For MVP: Show mock balance (in production, decrypt client-side with user's key)
+      if (!balanceData.isZero) {
+        // Mock: Extract "balance" from commitment for demo purposes
+        const mockBalance = Math.abs(parseInt(balanceData.commitment.slice(-6), 16) % 10000) / 100;
+        setBalance(mockBalance.toFixed(2));
+      } else {
+        setBalance('0.00');
+      }
+    } catch (error) {
+      console.error('Failed to load vault data:', error);
+      setBalance('0.00');
+    }
+  };
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setTxError(null);
   };
 
-  const handleTransfer = () => {
-    if (!formData.amount || !formData.recipient) return;
-    
+  const handleTransfer = async () => {
+    if (!formData.amount || !formData.recipient) {
+      setTxError('Amount and recipient are required');
+      return;
+    }
+
+    // Validate amount
+    const amount = parseFloat(formData.amount);
+    if (isNaN(amount) || amount <= 0) {
+      setTxError('Invalid amount');
+      return;
+    }
+
+    // Validate recipient address
+    if (!formData.recipient.startsWith('0x') || formData.recipient.length !== 66) {
+      setTxError('Invalid recipient address (must be 0x + 64 hex chars)');
+      return;
+    }
+
+    // Check if vault is paused
+    if (vaultPaused) {
+      setTxError('Vault is currently paused. Transfers disabled.');
+      return;
+    }
+
     setIsProcessing(true);
-    // Simulate ZK Proof generation time
-    setTimeout(() => {
+    setTxError(null);
+    setTxStatus('Preparing transfer...');
+
+    try {
+      setTxStatus('Generating ZK proof and submitting transaction...');
+      
+      const result = await transfer(wallet, formData.recipient, amount);
+      
+      if (result.success) {
+        setTxStatus(`Success! TX: ${result.txHash.slice(0, 20)}...`);
+        setFormData({ amount: '', recipient: '' });
+        
+        // Reload balance after transfer
+        setTimeout(() => {
+          if (wallet?.selectedAddress) {
+            loadVaultData(wallet.selectedAddress);
+          }
+          setTxStatus(null);
+        }, 3000);
+      } else {
+        throw new Error(result.error || 'Transfer failed');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Transfer failed';
+      setTxError(message);
+      setTxStatus(null);
+    } finally {
       setIsProcessing(false);
-      alert('ZK Proof Generated & Transaction Submitted to Starknet L2');
-      setFormData({ amount: '', recipient: '' });
-    }, 2000);
+    }
   };
 
   // Handlers for "Hold to Reveal"
@@ -236,9 +316,9 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
                 
                 {/* Secure Display Logic */}
                 {isBalanceRevealed ? (
-                   <span className="text-4xl sm:text-5xl md:text-6xl font-black tracking-widest text-black dark:text-white drop-shadow-ink-strong dark:drop-shadow-neon-strong break-all animate-[fadeIn_0.2s]">
-                      1,234.56
-                   </span>
+                  <span className="text-4xl sm:text-5xl md:text-6xl font-black tracking-widest text-black dark:text-white drop-shadow-ink-strong dark:drop-shadow-neon-strong break-all animate-[fadeIn_0.2s]">
+                    {balance}
+                  </span>
                 ) : (
                   <div className="flex items-center flex-wrap gap-2">
                     <span className="text-4xl sm:text-5xl md:text-6xl font-black tracking-widest text-black dark:text-white opacity-20 dark:opacity-40 blur-sm transition-all">
@@ -313,6 +393,27 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
               />
             </div>
             
+            {/* Error Message */}
+            {txError && (
+              <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-2xl text-red-600 dark:text-red-400 text-sm font-mono">
+                ⚠️ {txError}
+              </div>
+            )}
+
+            {/* Status Message */}
+            {txStatus && (
+              <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-2xl text-blue-600 dark:text-blue-400 text-sm font-mono animate-pulse">
+                ⚡ {txStatus}
+              </div>
+            )}
+
+            {/* Vault Paused Warning */}
+            {vaultPaused && (
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/50 rounded-2xl text-yellow-600 dark:text-yellow-400 text-sm font-mono">
+                ⚠️ Vault is paused. Transfers temporarily disabled.
+              </div>
+            )}
+            
             <button 
               onClick={handleTransfer}
               disabled={isProcessing}
@@ -322,7 +423,7 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
                        ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span className="relative z-10 flex items-center justify-center drop-shadow-neon">
-                {isProcessing ? 'COMPUTING ZK PROOF...' : '▶ GENERATE ZK PROOF + TRANSFER'}
+                {isProcessing ? (txStatus || 'PROCESSING...') : '▶ GENERATE ZK PROOF + TRANSFER'}
               </span>
               <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
             </button>
