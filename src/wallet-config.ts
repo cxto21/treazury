@@ -1,5 +1,4 @@
 import { RpcProvider, Account } from 'starknet';
-import { connect, disconnect } from 'starknetkit';
 
 /**
  * Network configuration for Starknet
@@ -57,23 +56,25 @@ export function createProvider(network: Network = 'mainnet'): RpcProvider {
 
 /**
  * Normalizar nombre de wallet para mostrar correctamente
- * starknetkit devuelve nombres normalizados desde la API oficial
+ * get-starknet-core devuelve nombres normalizados
  */
-function normalizeWalletName(walletId: string | undefined): string {
-  if (!walletId) return 'Unknown';
+function normalizeWalletName(wallet: any): string {
+  if (!wallet) return 'Unknown';
   
-  const id = walletId.toLowerCase();
+  const name = wallet.name?.toLowerCase() || '';
+  const id = wallet.id?.toLowerCase() || '';
   
-  // IDs oficiales de starknetkit
-  if (id === 'argentx') return 'Argent X';
-  if (id === 'braavos') return 'Braavos';
-  if (id === 'webwallet') return 'Argent Webwallet';
+  // Mapear nombres y IDs a nombres amigables
+  if (name.includes('argent') || id.includes('argent')) return 'Argent X';
+  if (name.includes('braavos') || id.includes('braavos')) return 'Braavos';
+  if (name.includes('webwallet') || name.includes('web')) return 'Argent Webwallet';
   
-  return walletId;
+  // Return original name if no match
+  return wallet.name || 'Unknown';
 }
 
 /**
- * Browser-only: Connect to Starknet wallet using starknetkit
+ * Browser-only: Connect to Starknet wallet
  * Returns Account if connected, null if cancelled
  */
 const WALLET_CONNECTION_TIMEOUT = 30000; // 30 seconds
@@ -84,7 +85,7 @@ export async function connectWallet(): Promise<Account | null> {
   }
 
   try {
-    console.log('[wallet-config] Starting wallet connection with starknetkit...');
+    console.log('[wallet-config] Starting wallet connection...');
     
     // Show loading indication early
     const statusEl = document.getElementById('status');
@@ -93,16 +94,11 @@ export async function connectWallet(): Promise<Account | null> {
       statusEl.className = 'status loading';
     }
     
-    // Use starknetkit's connect function (modern, maintained by Argent Labs)
+    // Use get-starknet-core's connect function (official, maintained by Starkware)
+    const { getStarknet } = await import('@starknet-io/get-starknet-core');
+    
     const result = await Promise.race([
-      connect({
-        modalMode: 'alwaysAsk',
-        modalTheme: 'dark',
-        // Filter to only show maintained wallets
-        include: ['argentX', 'braavos', 'webwallet'],
-        // Exclude unmaintained wallets
-        exclude: ['keplr', 'okx', 'xdefi', 'ready'],
-      }),
+      getStarknet({ showModal: true }),
       new Promise<never>((_, reject) =>
         setTimeout(
           () => reject(new Error('Wallet connection timeout - try again or use a different wallet')),
@@ -129,14 +125,18 @@ export async function connectWallet(): Promise<Account | null> {
     // Enable wallet if not already connected
     if (!result.isConnected) {
       console.log('[wallet-config] Wallet not connected, enabling...');
-      await result.enable();
+      try {
+        await result.enable();
+      } catch (enableError) {
+        console.warn('[wallet-config] Enable error (might be already connected):', enableError);
+      }
     }
 
     if (!result.account) {
       throw new Error('Wallet account not available after connection');
     }
 
-    const walletName = normalizeWalletName(result.id);
+    const walletName = normalizeWalletName(result);
     
     console.log('[wallet-config] ✅ Wallet connected successfully:', {
       name: walletName,
@@ -173,7 +173,11 @@ export async function disconnectWallet(): Promise<void> {
   }
 
   try {
-    await disconnect();
+    const { getStarknet } = await import('@starknet-io/get-starknet-core');
+    const starknet = await getStarknet();
+    if (starknet?.disconnect) {
+      await starknet.disconnect();
+    }
     console.log('[wallet-config] Wallet disconnected successfully');
   } catch (error) {
     console.error('[wallet-config] Wallet disconnection error:', error);
