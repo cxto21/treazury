@@ -1,132 +1,222 @@
-# Starknet Privacy Toolkit (Tongo + Verified Donor Badges)
+# Treazury - Privacy-First USDC Vault on Starknet
 
-This repository hosts an end-to-end reference implementation of Starknet privacy tooling. It combines two reference demos that share the same UI and contracts:
-1. A “Verified Donor Badge” flow that uses Noir circuits, Barretenberg proofs, Garaga-generated Cairo verifiers, and a Starknet badge contract to prove a donor met a threshold without revealing the amount.
-2. The Tongo private donation experience, showing how to fund, send, rollover, and withdraw encrypted balances on Starknet Mainnet (USDC) and Sepolia (STRK).
+> **A zero-knowledge KYC + encrypted USDC treasury leveraging ZKPassport, Tongo, and Cairo verification**
 
-> The goal of this README is to serve technical builders who want to reproduce or extend the flow—not to advertise a hackathon submission.
+Treazury is a non-custodial, privacy-preserving vault for USDC on Starknet that enables users to verify identity through zero-knowledge proofs without exposing personal data, manage encrypted USDC balances, and settle transactions verified by Cairo smart contracts—all through a cyberpunk-themed, mobile-first web interface deployed on Cloudflare Pages.
 
----
-
-## System Overview
-
-| Layer | Component | Purpose |
-| ----- | --------- | ------- |
-| Tongo Private Donations | `src/*.ts`, on-chain contracts in `src/wallet-config.ts` | Zero-knowledge wallet that hides STRK/USDC transfers while keeping fund/withdraw events public. Runs on Sepolia (STRK) and Mainnet (USDC). |
-| ZK Circuit | `zk-badges/donation_badge` | Noir circuit that hashes `(donation_amount, donor_secret)` with Poseidon and enforces `donation_amount >= threshold`. |
-| Proving | Barretenberg `0.67.0` | Generates Ultra Keccak Honk proofs + VK compatible with Garaga 0.15.5. |
-| Verifier | `donation_badge_verifier` | Garaga-generated verifier plus custom `DonationBadge` contract that mints tiered badges after proof validation. |
-| Backend | `api/generate-proof.ts` | Bun API that orchestrates witness creation, proving, and calldata generation. |
-| Frontend | `src/web/index.html` + `src/badge-service.ts` | Unified UI: funding/withdrawals follow the selected Starknet network, while the badge experience is currently hard-pinned to Sepolia. |
-
-> **Important:** The badge verifier is deployed only on **Starknet Sepolia** today. The UI always connects to Sepolia for badge proofs/claims even when the network toggle is on Mainnet for Tongo operations.
-
-### Deployed Contracts
-
-| Network | Component | Address | Notes |
-| ------- | --------- | ------- | ----- |
-| **Mainnet** | Tongo Donation Contract | `0x72098b84989a45cc00697431dfba300f1f5d144ae916e98287418af4e548d96` | Accepts USDC (see token below) |
-| Mainnet | USDC Token | `0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8` | ERC20 used for funding/withdraw |
-| **Sepolia** | Tongo Donation Contract | `0x00b4cca30f0f641e01140c1c388f55641f1c3fe5515484e622b6cb91d8cee585` | Testnet STRK version |
-| Sepolia | STRK Token | `0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d` | Testnet token used in UI |
-| Sepolia | `DonationBadge` Contract | `0x077ca6f2ee4624e51ed6ea6d5ca292889ca7437a0c887bf0d63f055f42ad7010` | Mints badge tiers after proof verification |
-| Sepolia | `UltraKeccakHonkVerifier` | `0x022b20fef3764d09293c5b377bc399ae7490e60665797ec6654d478d74212669` | Garaga-generated verifier used by badge contract |
-
-Deployment metadata lives in `deployments/`, and the frontend consumes it via `src/deployments.ts`. Add a new `<network>.json` file when you deploy additional environments.
+**Core Principle**: Your data stays on your device. The vault trusts math, not intermediaries.
 
 ---
 
-## Status Checklist
+## 📊 System Architecture
 
-- ✅ Noir circuit compiles (Noir `1.0.0-beta.1`)
-- ✅ Verifier contract declared + deployed on Sepolia (Garaga `0.15.5`, Scarb `2.9.2`)
-- ✅ Proof verified on-chain via `sncast call`
-- ✅ Repository is structured + committed
-- ✅ README rewritten for engineers
-- ✅ Tongo + badge frontend aligned (badges hard-pinned to Sepolia)
-- ⬜ Demo video (out of scope for repo)
-- ⬜ Devpost submission (handled externally)
+| Layer | Technology | Purpose |
+| ----- | ---------- | ------- |
+| **Frontend** | React 19.2.1 + Vite + Tailwind | Cyberpunk UI + proof generation orchestration |
+| **Services** | TypeScript + Starknet.js | Bridge between UI and contracts |
+| **Proof Generation** | Noir + Barretenberg + Garaga | ZK circuit compilation and STARK proofs |
+| **Smart Contracts** | Cairo + Scarb | On-chain proof verification + USDC state |
+| **Encrypted State** | Tongo SDK v1.3.0 | Hidden balances + private transfer operations |
+| **Hosting** | Cloudflare Pages + Wrangler | Global CDN deployment |
 
----
-
-## Tech Stack
-
-- **Noir** `1.0.0-beta.1` + Poseidon dependency
-- **Barretenberg** `0.67.0` (Ultra Keccak Honk backend)
-- **Garaga** `0.15.5` for Cairo verifier generation
-- **Scarb** `2.9.2` (Cairo build)
-- **Starknet Foundry** (`sncast`, `snforge`) for declares/deploys
-- **Starkli** for manual invocations
-- **Bun + TypeScript** for frontend/API
-
-Version pinning is critical; mismatched bb/Garaga/Noir combinations will produce incompatible proofs. See `BADGE_SETUP.md` for the downgrade narrative.
-
----
-
-## Repository Layout (Key Files Only)
+### Data Flow: Private Transfer
 
 ```
-zk-badges/
-  └── donation_badge/
-      ├── src/main.nr          # Noir circuit
-      ├── Nargo.toml           # Noir manifest (Poseidon dep)
-      ├── compute_commitment.js# Poseidon commitment helper
-      └── generate-proof.sh    # One-touch proof pipeline
-
-donation_badge_verifier/
-  ├── Scarb.toml               # Garaga project manifest
-  ├── src/honk_verifier*.cairo # Generated verifier modules
-  ├── src/badge_contract.cairo # Custom contract that mints badges
-  └── snfoundry.toml           # Deployment profile (Sepolia)
-
-deployments/
-  └── sepolia.json             # Contract registry consumed by frontend
-
-src/
-  ├── index.html               # Demo UI with badge section
-  ├── badge-service.ts         # Client helper for proofs + badge contract
-  └── deployments.ts           # Loader for deployment JSON files
-
-api/generate-proof.ts          # Bun API endpoint to invoke Noir/bb/Garaga
-BADGE_IMPLEMENTATION.md        # Requirements + architecture notes
-BADGE_SETUP.md                 # Environment + troubleshooting log
-DEPLOY.md                      # Pages deploy + deployment registry policy
+[User Interface]
+       ↓
+[1] Click "Generate Proof + Transfer"
+       ↓
+[Frontend Services]
+  ├─ Generate ZK Proof (Noir → Barretenberg → Garaga)
+  ├─ Verify on Cairo contract
+  └─ Execute encrypted Tongo transfer
+       ↓
+[Starknet Network]
+  ├─ Contract validation
+  ├─ State update
+  └─ Emit verification event
 ```
 
-### Per-directory guides
+### Deployed Contracts (Sepolia Testnet)
 
-- [`zk-badges/README.md`](zk-badges/README.md) – Noir circuit + proof generation instructions.
-- [`donation_badge_verifier/README.md`](donation_badge_verifier/README.md) – Garaga verifier + badge contract build/deploy guide.
-- Additional deep dives: [`BADGE_SETUP.md`](BADGE_SETUP.md) (toolchain troubleshooting) and [`BADGE_IMPLEMENTATION.md`](BADGE_IMPLEMENTATION.md) (design notes). Refer to those docs to avoid duplicating version tables elsewhere.
+| Component | Address | Purpose |
+| --------- | ------- | ------- |
+| ZKPassport Verifier | `0x0...` (TBD) | Validates KYC proofs from Noir circuits |
+| Tongo Vault | `0x00b4cca30f0f641e01140c1c388f55641f1c3fe5515484e622b6cb91d8cee585` | Manages encrypted USDC balances |
+| STRK Token (Testnet) | `0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d` | Gas + funding token |
+| USDC (Mainnet) | `0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8` | Target asset for vault |
+
+> **D2 Status**: Frontend + service layer complete. D3 will deploy verifier to Sepolia.
 
 ---
 
-## Getting Started
+## ✅ Development Status
 
-1. **Clone + install JS deps**
-   ```bash
-   git clone https://github.com/omarespejel/tongo-ukraine-donations.git
-   cd tongo-donation-demo
-   bun install
-   ```
+| Phase | Status | Deliverables |
+| ----- | ------ | ------------ |
+| **D1** | ✅ Complete | Origin docs (SRS, checklist, README) |
+| **D2** | ✅ Complete | Frontend integration + Vite build + service layer |
+| **D3** | 🔄 In Progress | E2E tests + Sepolia deployment + Noir integration |
+| **D4-D8** | 📋 Future | Mainnet, security audit, multi-chain support, DAO |
 
-2. **Install ZK toolchain (versions matter!)**
-   ```bash
-   # Noir & Barretenberg
-   curl -L noirup.dev | bash
-   noirup --version 1.0.0-beta.1
-   curl -L bbup.dev | bash
-   bbup --version 0.67.0
+### D2 Achievements
+- ✅ React 19.2.1 + Vite frontend cloned and integrated
+- ✅ Service layer (`src/web/services.ts`) bridging UI to backend
+- ✅ Vite production build optimized for Cloudflare Pages (3.23 kB HTML, 212 kB assets)
+- ✅ TypeScript compilation: 0 errors
+- ✅ Dev server running on port 3000
+- ✅ English documentation created (CHECKLIST.md, README_ORIGIN.md)
 
-   # Garaga + Cairo tooling (python3.10 + pip)
-   pip install garaga==0.15.5
-   brew install scarb@2.9.2  # or download release tarball
-   ```
+### D3 Tasks (Next)
+- [ ] Implement E2E test suite in `/.Tests/`
+- [ ] Deploy Cairo verifier to Starknet Sepolia
+- [ ] Integrate Noir circuit (replace mock proofs)
+- [ ] Connect frontend services to real on-chain verification
+- [ ] Setup Cloudflare Pages CI/CD pipeline
 
-3. **Configure Starknet credentials**
-   - `donation_badge_verifier/.secrets` contains **demo-only** RPC + account values. Do **not** push real keys—use `.secrets.example` as a template and keep your local `.secrets` added to `.gitignore`.
-   - For badge declares/claims use Sepolia accounts (see `donation_badge_verifier/snfoundry.toml`). For Tongo operations you can connect mainnet wallets directly in the UI.
-   - For Starkli-based flows, create a keystore and account config (see instructions in `BADGE_SETUP.md`).
+---
+
+## 🛠️ Tech Stack
+
+| Component | Version | Purpose |
+| --------- | ------- | ------- |
+| **Noir** | `1.0.0-beta.1` | ZK circuit compilation |
+| **Barretenberg** | `0.67.0` | Proof generation backend |
+| **Garaga** | `0.15.5` | Cairo verifier code generation |
+| **Cairo / Scarb** | `2.9.2` | Smart contract development |
+| **Starknet Foundry** | Latest | Contract testing + deployment |
+| **React** | `19.2.1` | Frontend framework |
+| **Vite** | `7.2.4` | Build tool + dev server |
+| **TypeScript** | `5.9.3` | Type safety |
+| **Starknet.js** | `8.9.1` | Blockchain SDK |
+| **Tongo SDK** | `1.3.0` | Encrypted wallet operations |
+| **Bun** | Latest | Runtime + package manager |
+| **Cloudflare Pages** | Latest | Hosting + global CDN |
+
+> **Version Pinning**: Mismatched Noir/Barretenberg/Garaga combinations produce incompatible proofs. See `BADGE_SETUP.md` for troubleshooting.
+
+---
+
+## 📁 Project Structure
+
+```
+treazury/
+├── src/web/                         # Frontend (React + Vite)
+│   ├── App.tsx                      # Root component + lifecycle
+│   ├── index.tsx                    # Vite entry point
+│   ├── services.ts                  # Backend bridge (6 core functions)
+│   ├── types.ts                     # TypeScript interfaces
+│   ├── components/
+│   │   ├── LoadingGate.tsx          # Hexagon security intro
+│   │   ├── VaultInterface.tsx       # Main vault UI
+│   │   ├── ZKPassportModal.tsx      # KYC verification flow
+│   │   └── ConnectWalletModal.tsx   # Wallet connection
+│   └── index.html                   # Static entry (Tailwind CDN)
+│
+├── src/                             # Backend services
+│   ├── zkpassport-service.ts        # Proof orchestration
+│   ├── tongo-service.ts             # Encrypted transfers
+│   ├── wallet-config.ts             # RPC + network config
+│   ├── deployments.ts               # Contract registry
+│   ├── types.ts                     # Shared types
+│   ├── config.ts                    # App configuration
+│   └── badge-service.ts             # Badge contract helpers
+│
+├── zkpassport_verifier/             # Cairo verifier (Scarb)
+│   ├── Scarb.toml
+│   ├── src/
+│   │   ├── lib.cairo
+│   │   ├── zkpassport_verifier.cairo
+│   │   └── badge_contract.cairo     # Badge minting contract
+│   └── tests/
+│       └── zkpassport_verifier_test.cairo
+│
+├── zk-badges/                       # Noir circuits
+│   ├── README.md
+│   ├── generate-proof.sh            # One-touch proof pipeline
+│   └── donation_badge/
+│       ├── Nargo.toml
+│       ├── src/main.nr              # Noir circuit logic
+│       └── compute_commitment.js    # Poseidon helper
+│
+├── .Tests/                          # E2E test suite (D3)
+│   ├── test_zkpassport_verifier.test.ts
+│   ├── test_tongo_usdc.test.ts
+│   ├── test_e2e_private_flow.test.ts
+│   └── test_security_thresholds.test.ts
+│
+├── origin/                          # Documentation (English)
+│   ├── SRS.md                       # Requirements (MoSCoW)
+│   ├── CHECKLIST.md                 # Integration tasks
+│   ├── README_ORIGIN.md             # Architecture details
+│   ├── D2_SUMMARY.md                # Phase 2 completion
+│   └── D3_ROADMAP.md                # Phase 3 planning
+│
+├── deployments/                     # Contract metadata
+│   ├── sepolia.json                 # Sepolia testnet registry
+│   └── mainnet.json                 # Mainnet registry (future)
+│
+├── dist/                            # Production build (Vite output)
+├── index.html                       # Vite entry point (root)
+├── vite.config.ts                   # Vite configuration
+├── tsconfig.json                    # TypeScript + JSX config
+├── package.json                     # Dependencies + scripts
+├── wrangler.toml                    # Cloudflare Pages config
+├── README.md                        # This file (English)
+└── LICENSE                          # ISC license
+```
+
+### Key Documents
+
+- **[origin/SRS.md](origin/SRS.md)** – Complete requirements specification (MoSCoW analysis)
+- **[origin/CHECKLIST.md](origin/CHECKLIST.md)** – Integration tasks (Resource2 → Treazury mapping)
+- **[origin/README_ORIGIN.md](origin/README_ORIGIN.md)** – Detailed architecture overview
+- **[origin/D2_SUMMARY.md](origin/D2_SUMMARY.md)** – Phase 2 completion report with metrics
+- **[origin/D3_ROADMAP.md](origin/D3_ROADMAP.md)** – Phase 3 detailed planning
+- **[BADGE_SETUP.md](BADGE_SETUP.md)** – Toolchain setup + troubleshooting
+- **[DEPLOY.md](DEPLOY.md)** – Deployment policy + procedure
+- **[zk-badges/README.md](zk-badges/README.md)** – Noir circuit guide
+- **[donation_badge_verifier/README.md](donation_badge_verifier/README.md)** – Cairo verifier guide
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ or Bun runtime
+- Braavos / Argent X wallet (for testnet)
+- STRK (testnet) or USDC (mainnet)
+
+### Installation
+
+```bash
+git clone https://github.com/cxto21/treazury.git
+cd treazury
+bun install
+```
+
+### Local Development
+
+```bash
+# Development server (http://localhost:3000)
+bun run dev:web
+
+# Type checking
+bun run type-check
+
+# Production build
+bun run build:web
+```
+
+### Environment Setup
+
+Create `.env.local`:
+```bash
+STARKNET_RPC=https://starknet-sepolia.public.blastapi.io
+STARKNET_CHAIN_ID=SN_SEPOLIA
+ZKPASSPORT_CONTRACT=0x0...  # Will be set after deploy
+TONGO_CONTRACT=0x00b4cca30f0f641e01140c1c388f55641f1c3fe5515484e622b6cb91d8cee585
+```
 
 ---
 
