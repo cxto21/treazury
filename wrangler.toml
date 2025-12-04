@@ -2,16 +2,24 @@
 # Updated: December 4, 2025
 
 name = "treazury"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 pages_build_output_dir = "dist"
 
 # Production environment
 [env.production]
-name = "treazury"
-pages_build_output_dir = "dist"
+name = "treazury-production"
 
-# Environment variables (set via Cloudflare Dashboard)
-# STARKNET_RPC=https://ztarknet-madara.d.karnot.xyz
-# TREAZURY_VAULT_ADDRESS=0x04cbe8011bddc3fa7d7832db096122f3ec5bb937f5bf5b3db852319664239196
-# NETWORK=ztarknet-testnet
+# Preview environment
+[env.preview]
+name = "treazury-preview"
 
+# Build configuration
+# Set these variables in Cloudflare Dashboard > Pages > Settings > Environment Variables
+# 
+# Required variables:
+# VITE_NETWORK=ztarknet-testnet
+# VITE_STARKNET_RPC=https://ztarknet-madara.d.karnot.xyz
+# VITE_TREAZURY_VAULT_ADDRESS=0x04cbe8011bddc3fa7d7832db096122f3ec5bb937f5bf5b3db852319664239196
+# VITE_TREAZURY_VAULT_OWNER=0x5b7213d74268643e884c026569b800f463fd9f5b86493fb2551c38507f045fa
+# VITE_EXPLORER_URL=https://explorer.ztarknet.cash
+# VITE_FAUCET_URL=https://faucet.ztarknet.cash
