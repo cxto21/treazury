@@ -1,4 +1,5 @@
 import { RpcProvider, Account } from 'starknet';
+import { connect, disconnect } from 'starknetkit';
 
 /**
  * Network configuration for Starknet
@@ -94,11 +95,9 @@ export async function connectWallet(): Promise<Account | null> {
       statusEl.className = 'status loading';
     }
     
-    // Use get-starknet-core's connect function (official, maintained by Starkware)
-    const { getStarknet } = await import('@starknet-io/get-starknet-core');
-    
+    // Use starknetkit's connect - it has the visual modal with wallet detection
     const result = await Promise.race([
-      getStarknet({ showModal: true }),
+      connect(),
       new Promise<never>((_, reject) =>
         setTimeout(
           () => reject(new Error('Wallet connection timeout - try again or use a different wallet')),
@@ -174,7 +173,7 @@ export async function disconnectWallet(): Promise<void> {
 
   try {
     const { getStarknet } = await import('@starknet-io/get-starknet-core');
-    const starknet = await getStarknet();
+    const starknet = await getStarknet({ silent: true });
     if (starknet?.disconnect) {
       await starknet.disconnect();
     }
