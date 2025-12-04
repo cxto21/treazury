@@ -1,42 +1,42 @@
-# 🪙 Depositar USDC en Testnet - Guía Completa
+# 🪙 Deposit USDC on Testnet - Complete Guide
 
-## 📋 Resumen Rápido
+## 📋 Quick Summary
 
-Para probar Treazury con USDC en testnet necesitas:
+To test Treazury with USDC on testnet you need:
 
-1. **Obtener ETH en Ethereum Sepolia** (faucet)
-2. **Intercambiar ETH → USDC** en Ethereum
-3. **Puente USDC a Starknet Sepolia** (Starkgate)
-4. **Depositar USDC en Tongo** (mediante Treazury UI)
+1. **Get ETH on Ethereum Sepolia** (faucet)
+2. **Swap ETH → USDC** on Ethereum
+3. **Bridge USDC to Starknet Sepolia** (Starkgate)
+4. **Deposit USDC to Tongo** (via Treazury UI)
 
-**Tiempo total: ~30 minutos**
+**Total time: ~30 minutes**
 
 ---
 
-## 🚀 Paso 1: Obtener ETH en Ethereum Sepolia
+## 🚀 Step 1: Get ETH on Ethereum Sepolia
 
-### ¿Qué es Ethereum Sepolia?
-- Red de prueba **SEPARADA** de Starknet
-- Necesitas ETH aquí para pagar gas en Ethereum
-- No confundir con Starknet
+### What is Ethereum Sepolia?
+- Test network **SEPARATE** from Starknet
+- You need ETH here to pay for gas on Ethereum
+- Don't confuse with Starknet
 
-### Opción A: Alchemy Faucet (Recomendado)
+### Option A: Alchemy Faucet (Recommended)
 
-1. Ir a https://sepoliafaucet.com
-2. Conectar wallet (Argent X, Braavos, MetaMask)
-3. **⚠️ CAMBIAR A ETHEREUM SEPOLIA EN LA WALLET**
-4. Hacer clic en "Send me ETH"
-5. Recibir 0.5 ETH en ~1 minuto
+1. Go to https://sepoliafaucet.com
+2. Connect wallet (Argent X, Braavos, MetaMask)
+3. **⚠️ SWITCH TO ETHEREUM SEPOLIA IN YOUR WALLET**
+4. Click "Send me ETH"
+5. Receive 0.5 ETH in ~1 minute
 
-### Opción B: Google Cloud Faucet
+### Option B: Google Cloud Faucet
 
-1. Ir a https://cloud.google.com/application/web3/faucet/ethereum/sepolia
-2. Ingresar dirección Ethereum
-3. Recibir 0.5 ETH
+1. Go to https://cloud.google.com/application/web3/faucet/ethereum/sepolia
+2. Enter your Ethereum address
+3. Receive 0.5 ETH
 
-### ✅ Verificar
+### ✅ Verify
 
-En tu wallet en **Ethereum Sepolia**, deberías ver:
+In your wallet on **Ethereum Sepolia**, you should see:
 ```
 Balance: 0.5 ETH
 Network: Ethereum Sepolia
@@ -44,73 +44,73 @@ Network: Ethereum Sepolia
 
 ---
 
-## 💱 Paso 2: Intercambiar ETH → USDC en Ethereum Sepolia
+## 💱 Step 2: Swap ETH → USDC on Ethereum Sepolia
 
-### En Uniswap
+### On Uniswap
 
-1. Ir a https://app.uniswap.org
-2. **Verificar que dice "Ethereum Sepolia"** en selector de red
-3. Conectar wallet
-4. Intercambiar:
-   - De: 0.1 ETH
-   - A: USDC
-5. Hacer clic en "Swap"
-6. Confirmar en wallet
-7. Esperar ~1 minuto
+1. Go to https://app.uniswap.org
+2. **Verify that it says "Ethereum Sepolia"** in the network selector
+3. Connect your wallet
+4. Swap:
+   - From: 0.1 ETH
+   - To: USDC
+5. Click "Swap"
+6. Confirm in your wallet
+7. Wait ~1 minute
 
-### ¿Cuánto USDC recibiré?
+### How much USDC will I receive?
 
 ```
-0.1 ETH ≈ 20-30 USDC (depende del precio)
+0.1 ETH ≈ 20-30 USDC (depends on price)
 ```
 
-### ✅ Verificar
+### ✅ Verify
 
-En tu wallet en **Ethereum Sepolia**, deberías ver:
+In your wallet on **Ethereum Sepolia**, you should see:
 ```
 Balance: ~0.4 ETH, ~20 USDC
 Network: Ethereum Sepolia
 ```
 
-### Opción: Mint USDC Directamente
+### Option: Mint USDC Directly
 
-Si prefieres no intercambiar, puedes "minar" USDC testnet:
+If you prefer not to swap, you can mint testnet USDC:
 
-1. Ir a https://sepolia.etherscan.io/token/0x6aed99757d547b8e39cd1cebf11b45ff7e1bfd65
-2. Hacer clic en "Write Contract"
-3. Conectar wallet
-4. Llamar función `mint()` (con tu dirección)
-5. Recibir USDC testnet
+1. Go to https://sepolia.etherscan.io/token/0x6aed99757d547b8e39cd1cebf11b45ff7e1bfd65
+2. Click "Write Contract"
+3. Connect your wallet
+4. Call the `mint()` function (with your address)
+5. Receive testnet USDC
 
 ---
 
-## 🌉 Paso 3: Puente USDC a Starknet Sepolia
+## 🌉 Step 3: Bridge USDC to Starknet Sepolia
 
-### Usar Starkgate (Oficial)
+### Use Starkgate (Official)
 
-1. Ir a https://starkgate.starknet.io/
-2. Conectar wallet (verifica que esté en **Ethereum Sepolia**)
-3. Seleccionar:
-   - Origen: "Ethereum Sepolia"
-   - Destino: "Starknet Sepolia"
+1. Go to https://starkgate.starknet.io/
+2. Connect your wallet (verify it's on **Ethereum Sepolia**)
+3. Select:
+   - Origin: "Ethereum Sepolia"
+   - Destination: "Starknet Sepolia"
    - Token: "USDC"
-4. Ingresar cantidad (recomendado: 10 USDC mínimo)
-5. Hacer clic en "Bridge"
-6. Confirmar en wallet
-7. **ESPERAR 5-10 MINUTOS** ⏳
+4. Enter amount (recommended: 10 USDC minimum)
+5. Click "Bridge"
+6. Confirm in your wallet
+7. **WAIT 5-10 MINUTES** ⏳
 
-### Durante el Puente
+### During the Bridge
 
 ```
 Status: "Bridging in progress"
-Estimado: 5-10 minutos
+Estimated: 5-10 minutes
 ```
 
-No cerres la pestaña.
+Don't close the tab.
 
-### ✅ Después del Puente
+### ✅ After the Bridge
 
-En tu wallet en **Starknet Sepolia**, deberías ver:
+In your wallet on **Starknet Sepolia**, you should see:
 ```
 Balance: 10 USDC
 Network: Starknet Sepolia
@@ -118,184 +118,184 @@ Network: Starknet Sepolia
 
 ---
 
-## 🔗 Paso 4: Depositar en Tongo mediante Treazury
+## 🔗 Step 4: Deposit to Tongo via Treazury
 
-### Usar la UI de Treazury
+### Use Treazury UI
 
-1. Abrir http://localhost:3000 (o tu instancia de Treazury)
-2. Conectar wallet → "Starknet Sepolia"
-3. Verificar balance USDC (debe mostrar ~10 USDC)
-4. Hacer clic en "💰 Deposit USDC"
-5. Ingresar cantidad (ej: 5 USDC)
-6. Hacer clic en "💳 Deposit to Tongo"
-7. **IMPORTANTE: Completar KYC primero** (si no está verificado)
-8. Confirmar en wallet:
-   - Aprobación (approve)
-   - Depósito (transfer)
-9. Esperar confirmación (~1-2 minutos)
+1. Open http://localhost:3000 (or your Treazury instance)
+2. Connect wallet → "Starknet Sepolia"
+3. Verify USDC balance (should show ~10 USDC)
+4. Click "💰 Deposit USDC"
+5. Enter amount (e.g., 5 USDC)
+6. Click "💳 Deposit to Tongo"
+7. **IMPORTANT: Complete KYC first** (if not verified)
+8. Confirm in your wallet:
+   - Approval (approve)
+   - Deposit (transfer)
+9. Wait for confirmation (~1-2 minutes)
 
-### Panel de Progreso
+### Progress Panel
 
-Verás 4 pasos:
+You will see 4 steps:
 ```
-✅ Verificar Balance
+✅ Verify Balance
    ↓
-⏳ Aprobar USDC
+⏳ Approve USDC
    ↓
-⏳ Depositar en Tongo
+⏳ Deposit to Tongo
    ↓
-⏳ Verificar Depósito
+⏳ Verify Deposit
 ```
 
-### ✅ Después del Depósito
+### ✅ After Deposit
 
 ```
-✅ Balance actualizado
-✅ Fondos en Tongo (encriptados)
-✅ Listo para transferencias privadas
+✅ Balance updated
+✅ Funds in Tongo (encrypted)
+✅ Ready for private transfers
 ```
 
 ---
 
-## 🔧 Solución de Problemas
+## 🔧 Troubleshooting
 
 ### ❌ Error: "Insufficient Balance"
 
-**Causa**: No tienes suficiente USDC
-**Solución**: 
-- Verifica el balance en wallet
-- Inicia sesión en https://starkgate.starknet.io/ para ver estado del puente
-- Espera confirmación si aún está en progreso
+**Cause**: You don't have enough USDC
+**Solution**: 
+- Check your wallet balance
+- Log in to https://starkgate.starknet.io/ to see bridge status
+- Wait for confirmation if still in progress
 
 ### ❌ Error: "Network Mismatch"
 
-**Causa**: Wallet conectada a red incorrecta
-**Solución**:
-- En wallet, selecciona "Ethereum Sepolia" para intercambios
-- En wallet, selecciona "Starknet Sepolia" para puente y Treazury
-- Verifica selector de red en cada sitio
+**Cause**: Wallet connected to wrong network
+**Solution**:
+- In wallet, select "Ethereum Sepolia" for swaps
+- In wallet, select "Starknet Sepolia" for bridge and Treazury
+- Verify network selector on each site
 
 ### ❌ Error: "KYC Required"
 
-**Causa**: No has completado verificación de identidad
-**Solución**:
-- En Treazury, haz clic en "Verify Identity" o "Verify KYC"
-- Sigue los pasos de verificación
-- Espera confirmación (~1 minuto)
-- Reintenta depositar
+**Cause**: You haven't completed identity verification
+**Solution**:
+- In Treazury, click "Verify Identity" or "Verify KYC"
+- Follow the verification steps
+- Wait for confirmation (~1 minute)
+- Retry deposit
 
-### ❌ El puente no aparece confirmado después de 15 minutos
+### ❌ Bridge not confirmed after 15 minutes
 
-**Causa**: Congestión o retraso en red
-**Solución**:
-- Espera más (hasta 30 minutos en ocasiones)
-- Verifica hash en https://starkscan.co/
-- Contacta soporte Starkgate si persiste
+**Cause**: Network congestion or delay
+**Solution**:
+- Wait longer (up to 30 minutes sometimes)
+- Check hash on https://starkscan.co/
+- Contact Starkgate support if persists
 
 ---
 
-## 📊 Flujo Completo (Diagrama)
+## 📊 Complete Flow (Diagram)
 
 ```
-┌─ ETHEREUM SEPOLIA ───────────────────────────────┐
-│                                                  │
-│  1. Faucet → 0.5 ETH                            │
-│     ↓                                            │
-│  2. Uniswap → 0.1 ETH → 20 USDC                 │
-│     ↓                                            │
-│  3. Starkgate Bridge                            │
-│     └──────────────────────────────────┐         │
-│                                        │         │
-└────────────────────────────────────────┼─────────┘
+┌─ ETHEREUM SEPOLIA ────────────────────────────────┐
+│                                                   │
+│  1. Faucet → 0.5 ETH                             │
+│     ↓                                             │
+│  2. Uniswap → 0.1 ETH → 20 USDC                  │
+│     ↓                                             │
+│  3. Starkgate Bridge                             │
+│     └──────────────────────────────────┐          │
+│                                        │          │
+└────────────────────────────────────────┼──────────┘
                                          │
                                    (5-10 min)
                                          │
                                          ↓
-┌─ STARKNET SEPOLIA ───────────────────────────────┐
-│                                                  │
-│  4. Balance USDC                                 │
-│     ↓                                            │
-│  5. KYC Verification (si no hecho)               │
-│     ↓                                            │
-│  6. Treazury → Deposit USDC                      │
-│     ├─ Approve (firma 1)                        │
-│     ├─ Deposit (firma 2)                        │
-│     └─ ✅ Fondos en Tongo                        │
-│                                                  │
-│  7. Listo para usar                              │
-│                                                  │
-└──────────────────────────────────────────────────┘
+┌─ STARKNET SEPOLIA ────────────────────────────────┐
+│                                                   │
+│  4. USDC Balance                                  │
+│     ↓                                             │
+│  5. KYC Verification (if not done)                │
+│     ↓                                             │
+│  6. Treazury → Deposit USDC                       │
+│     ├─ Approve (signature 1)                     │
+│     ├─ Deposit (signature 2)                     │
+│     └─ ✅ Funds in Tongo                         │
+│                                                   │
+│  7. Ready to use                                  │
+│                                                   │
+└───────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 💡 Tips Útiles
+## 💡 Useful Tips
 
-### Mantener Gas Fee en Reserve
+### Keep Gas Fees in Reserve
 ```
-Guardar ~0.05 ETH en Ethereum Sepolia para gas fees
-Guardar ~0.01 STRK en Starknet Sepolia para gas fees
+Keep ~0.05 ETH on Ethereum Sepolia for gas fees
+Keep ~0.01 STRK on Starknet Sepolia for gas fees
 ```
 
-### Para Testnet
+### For Testnet
 
 ```
-USDC en Ethereum Sepolia: 0x6aed99757d547b8e39cd1cebf11b45ff7e1bfd65
-USDC en Starknet Sepolia: 0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
+USDC on Ethereum Sepolia: 0x6aed99757d547b8e39cd1cebf11b45ff7e1bfd65
+USDC on Starknet Sepolia: 0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
 Tongo Sepolia: 0x00b4cca30f0f641e01140c1c388f55641f1c3fe5515484e622b6cb91d8cee585
 ```
 
-### Monitorear Transacciones
+### Monitor Transactions
 
 ```
 Ethereum: https://sepolia.etherscan.io
-Starknet: https://starkscan.co (seleccionar Sepolia)
+Starknet: https://starkscan.co (select Sepolia)
 ```
 
-### Velocidad
+### Timeline
 
-| Paso | Tiempo |
-|------|--------|
+| Step | Time |
+|------|------|
 | Faucet | 1 min |
 | Swap | 1 min |
 | Bridge | 5-10 min |
-| Deposito | 1-2 min |
+| Deposit | 1-2 min |
 | **Total** | **~20 min** |
 
 ---
 
-## ✅ Checklist Final
+## ✅ Final Checklist
 
-- [ ] 0.5 ETH en Ethereum Sepolia
-- [ ] ~20 USDC en Ethereum Sepolia
-- [ ] 10 USDC en Starknet Sepolia (vía puente)
-- [ ] Wallet conectada a Starknet Sepolia en Treazury
-- [ ] Balance muestra USDC en Treazury
-- [ ] KYC verificado (si necesario)
-- [ ] Deposito completado exitosamente
-- [ ] Fondos visibles en Tongo vault
+- [ ] 0.5 ETH on Ethereum Sepolia
+- [ ] ~20 USDC on Ethereum Sepolia
+- [ ] 10 USDC on Starknet Sepolia (via bridge)
+- [ ] Wallet connected to Starknet Sepolia in Treazury
+- [ ] Balance shows USDC in Treazury
+- [ ] KYC verified (if necessary)
+- [ ] Deposit completed successfully
+- [ ] Funds visible in Tongo vault
 
 ---
 
-## 🎉 ¡Listo!
+## 🎉 All Set!
 
-Ya tienes USDC en Starknet Sepolia y puedes probar Treazury completamente.
+You now have USDC on Starknet Sepolia and can fully test Treazury.
 
-### Próximos Pasos
+### Next Steps
 
-- Transferencias privadas (Private Transfer)
+- Private transfers (Private Transfer)
 - Lightning Network integration
-- Donaciones anónimas
-- Withdraw (retiro) de fondos
+- Anonymous donations
+- Fund withdrawal
 
 ---
 
-## 📞 Ayuda
+## 📞 Support
 
-Si tienes problemas:
-1. Verifica el checklist arriba
-2. Revisa el estado en Starkscan.co
-3. Espera confirmación de puente (puede tomar 10 min)
-4. Asegúrate de que network selector es correcto
+If you have issues:
+1. Check the checklist above
+2. Review status on Starkscan.co
+3. Wait for bridge confirmation (may take 10 min)
+4. Ensure network selector is correct
 
-¡Que disfrutes probando Treazury! 🚀
+Enjoy testing Treazury! 🚀
