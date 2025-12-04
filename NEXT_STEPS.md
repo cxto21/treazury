@@ -1,135 +1,135 @@
-# ZKPassport - Próximos Pasos
+# ZKPassport - Next Steps
 
-**Estado Actual**: ✅ Implementación Core Completada  
-**Fecha**: December 4, 2025  
-**Commit**: 3d18e77 (Latest)  
-**Timeline**: 40% completo (2.5 días de 5-7 días estimados)
-
----
-
-## Estado Actual de Componentes
-
-```
-✅ COMPLETADOS:
-   • Circuito Noir (300+ líneas) - Compilado
-   • Validación MRZ (200+ líneas) - Compilado
-   • Contrato Cairo (120+ líneas) - Compilado
-   • Documentación (3,256+ líneas) - Completa
-   • Datos de prueba (Prover.toml) - Listos
-
-⧳ PRÓXIMA FASE:
-   • Pruebas Noir Circuit (4-6 horas)
-   • Pruebas Cairo Contract (2-3 horas)
-   • Pruebas E2E (4-6 horas)
-   • Deployment Sepolia (1-2 horas)
-
-📋 TAREAS POR COMPLETAR:
-   1. Ejecutar suite de pruebas
-   2. Integración con frontend
-   3. Deployment a testnet
-   4. Pruebas con datos reales
-```
+**Current Status**: ✅ Core Implementation Complete  
+**Date**: December 4, 2025  
+**Commit**: 3e5ce6e (Latest)  
+**Timeline**: 40% complete (2.5 days of 5-7 days estimated)
 
 ---
 
-## Instrucciones para Continuar
+## Current Component Status
 
-### Fase 1: Pruebas del Circuito Noir (Inmediato)
+```
+✅ COMPLETED:
+   • Noir Circuit (300+ lines) - Compiled
+   • MRZ Validation (200+ lines) - Compiled
+   • Cairo Contract (120+ lines) - Compiled
+   • Documentation (3,256+ lines) - Complete
+   • Test Data (Prover.toml) - Ready
 
-**1.1 Compilación Verification**
+⧳ NEXT PHASE:
+   • Noir Circuit Tests (4-6 hours)
+   • Cairo Contract Tests (2-3 hours)
+   • E2E Tests (4-6 hours)
+   • Sepolia Deployment (1-2 hours)
+
+📋 REMAINING TASKS:
+   1. Execute test suite
+   2. Frontend integration
+   3. Deploy to testnet
+   4. Real data testing
+```
+
+---
+
+## Instructions to Continue
+
+### Phase 1: Noir Circuit Testing (Immediate)
+
+**1.1 Compilation Verification**
 ```bash
 cd /workspaces/treazury/zkpassport_verifier
-nargo build  # Debe mostrar: "Compiled successfully"
+nargo build  # Should display: "Compiled successfully"
 ```
 
-**1.2 Crear suite de pruebas**
+**1.2 Create test suite**
 ```bash
-# Crear archivo: src/main.nr con #[test] functions
-# Ver plantilla en ZKPASSPORT_TESTING_PLAN.md Phase 1
+# Create file: src/main.nr with #[test] functions
+# See template in ZKPASSPORT_TESTING_PLAN.md Phase 1
 ```
 
-**1.3 Ejecutar pruebas**
+**1.3 Run tests**
 ```bash
-nargo test  # Ejecutar con Prover.toml como witness
+nargo test  # Execute with Prover.toml as witness
 ```
 
-**Criterios de Éxito**:
-- ✅ Validación de formato MRZ
-- ✅ Cálculo correcto de checksums MOD-97
-- ✅ Extracción correcta de campos
-- ✅ Commitment de hashes Poseidon
-- ✅ Asignación correcta de niveles KYC
+**Success Criteria**:
+- ✅ MRZ format validation
+- ✅ MOD-97 checksum calculation
+- ✅ Field extraction
+- ✅ Poseidon hash commitment
+- ✅ KYC level assignment
 
 ---
 
-### Fase 2: Pruebas del Contrato Cairo (1 día después)
+### Phase 2: Cairo Contract Testing (1 day later)
 
-**2.1 Compilación Verification**
+**2.1 Compilation Verification**
 ```bash
 cd /workspaces/treazury/zkpassport_verifier
-scarb build  # Debe mostrar: "Finished `dev` profile"
+scarb build  # Should display: "Finished `dev` profile"
 ```
 
-**2.2 Pruebas básicas**
+**2.2 Basic tests**
 ```bash
-# Crear archivo: src/zkpassport_verifier_test.cairo
-# Tests para: storage, revocation, replay protection
+# Create file: src/zkpassport_verifier_test.cairo
+# Tests for: storage, revocation, replay protection
 ```
 
-**Criterios de Éxito**:
-- ✅ Storage de KYC levels funciona
-- ✅ Timestamps se guardan correctamente
-- ✅ No permite downgrades
-- ✅ Protección contra replay activa
+**Success Criteria**:
+- ✅ KYC levels storage works
+- ✅ Timestamps saved correctly
+- ✅ No downgrades allowed
+- ✅ Replay protection active
 
 ---
 
-### Fase 3: Integración Frontend (2 días)
+### Phase 3: Frontend Integration (2 days)
 
-**3.1 Conectar API con circuito real**
+**3.1 Connect API with real circuit**
 ```bash
-# Archivo: api/server.ts
-# Cambiar: mock circuit → real Noir circuit
+# File: api/server.ts
+# Change: mock circuit → real Noir circuit
 # Endpoint: POST /api/zkpassport/generate-proof
 ```
 
-**3.2 Test E2E**
+**3.2 E2E Testing**
 ```bash
 # Frontend: ZKPassportModal.tsx
-# Flow: Captura → OCR → MRZ parsing → Backend proof → On-chain verify
+# Flow: Capture → OCR → MRZ parsing → Backend proof → On-chain verify
 ```
 
-**Criterios de Éxito**:
-- ✅ Captura de imagen en navegador
-- ✅ OCR genera MRZ válido
-- ✅ Backend calcula proof
-- ✅ Contrato verifica proof
-- ✅ KYC status se actualiza on-chain
+**Success Criteria**:
+- ✅ Image capture in browser
+- ✅ OCR generates valid MRZ
+- ✅ Backend calculates proof
+- ✅ Contract verifies proof
+- ✅ KYC status updates on-chain
 
 ---
 
-### Fase 4: Deployment Sepolia (3 días)
+### Phase 4: Sepolia Deployment (3 days)
 
-**4.1 Crear cuenta**
+**4.1 Create account**
 ```bash
 sncast account create --name zkpassport_account
-# Guarda la dirección en: deployments/sepolia.json
+# Save address in: deployments/sepolia.json
 ```
 
-**4.2 Declarar contrato**
+**4.2 Declare contract**
 ```bash
 sncast --profile sepolia declare \
   --contract target/dev/zkpassport_verifier_zkpassport_verifier.contract_class.json
 ```
 
-**4.3 Deployar**
+**4.3 Deploy**
 ```bash
 sncast --profile sepolia deploy \
   --class-hash <CLASS_HASH_FROM_DECLARE> \
   --constructor-calldata <OWNER_ADDRESS>
 ```
 
-**4.4 Actualizar configuración**
+**4.4 Update configuration**
 ```json
 // deployments/sepolia.json
 {
@@ -142,38 +142,38 @@ sncast --profile sepolia deploy \
 }
 ```
 
-**Criterios de Éxito**:
-- ✅ Cuenta creada en Sepolia
-- ✅ Contrato declarado
-- ✅ Contrato deployado
-- ✅ Configuración actualizada
-- ✅ Frontend apunta a contrato en testnet
+**Success Criteria**:
+- ✅ Account created on Sepolia
+- ✅ Contract declared
+- ✅ Contract deployed
+- ✅ Configuration updated
+- ✅ Frontend points to testnet contract
 
 ---
 
-## Ubicación de Archivos Clave
+## Key File Locations
 
 ```
 /workspaces/treazury/
-├── IMPLEMENTATION.md              ← Documentación técnica completa
-├── ZKPASSPORT_STATUS.md           ← Estado actual de componentes
-├── ZKPASSPORT_TESTING_PLAN.md     ← Plan de pruebas detallado
-├── PROGRESS_SUMMARY.md            ← Resumen de progreso
+├── IMPLEMENTATION.md              ← Complete technical documentation
+├── ZKPASSPORT_STATUS.md           ← Current component status
+├── ZKPASSPORT_TESTING_PLAN.md     ← Detailed testing plan
+├── PROGRESS_SUMMARY.md            ← Progress summary
 └── zkpassport_verifier/
-    ├── Nargo.toml                 ← Config Noir
-    ├── Scarb.toml                 ← Config Cairo
-    ├── IMPLEMENTATION.md          ← Docs del circuito
-    ├── Prover.toml                ← Datos de prueba
+    ├── Nargo.toml                 ← Noir config
+    ├── Scarb.toml                 ← Cairo config
+    ├── IMPLEMENTATION.md          ← Circuit documentation
+    ├── Prover.toml                ← Test data
     └── src/
-        ├── main.nr                ← Noir circuit (300+ líneas)
-        ├── mrz_validation.nr      ← Validación MRZ (200+ líneas)
-        ├── zkpassport_verifier.cairo  ← Contrato Cairo
-        └── mrz_validator.cairo    ← Validador MRZ Cairo
+        ├── main.nr                ← Noir circuit (300+ lines)
+        ├── mrz_validation.nr      ← MRZ validation (200+ lines)
+        ├── zkpassport_verifier.cairo  ← Cairo contract
+        └── mrz_validator.cairo    ← Cairo MRZ validator
 ```
 
 ---
 
-## Comandos Rápidos de Referencia
+## Quick Reference Commands
 
 ```bash
 # Build
@@ -181,7 +181,7 @@ cd /workspaces/treazury/zkpassport_verifier
 nargo build
 scarb build
 
-# Test (cuando esté implementado)
+# Test (when implemented)
 nargo test
 scarb test
 
@@ -198,213 +198,213 @@ git diff HEAD~1
 
 ---
 
-## Arquitectura del Sistema (Quick Reference)
+## System Architecture (Quick Reference)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                          USUARIO                                 │
-│  • Captura pasaporte en navegador                               │
-│  • OCR local (Tesseract.js en WASM)                             │
-│  • MRZ parsing local                                            │
+│                          USER                                    │
+│  • Capture passport in browser                                  │
+│  • Local OCR (Tesseract.js in WASM)                             │
+│  • Local MRZ parsing                                            │
 └──────────────────────┬──────────────────────────────────────────┘
-                       │ (JSON con campos de texto)
+                       │ (JSON with text fields)
                        ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │                    BACKEND (api/server.ts)                        │
-│  • Recibe: {nationality, document, dob, ...}                    │
-│  • Calcula: Poseidon hashes (irreversible)                      │
-│  • Invoca: Noir circuit con inputs                              │
+│  • Receive: {nationality, document, dob, ...}                   │
+│  • Calculate: Poseidon hashes (irreversible)                    │
+│  • Invoke: Noir circuit with inputs                             │
 └──────────────────────┬──────────────────────────────────────────┘
                        │ (Private inputs)
                        ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │              NOIR CIRCUIT (zkpassport_verifier/src/main.nr)       │
-│  STEP 1: Valida formato de entrada                              │
-│  STEP 2: Valida MRZ format (ICAO Doc 9303)                      │
-│  STEP 3: Extrae y verifica campos MRZ                           │
-│  STEP 4: Computa Poseidon hashes                                │
-│  STEP 5: Valida nivel KYC según documento                       │
-│  STEP 6: Verifica timestamp razonable                           │
-│  OUTPUT: STARK proof + public inputs (hashes solo)              │
+│  STEP 1: Validate input format                                  │
+│  STEP 2: Validate MRZ format (ICAO Doc 9303)                    │
+│  STEP 3: Extract and verify MRZ fields                          │
+│  STEP 4: Compute Poseidon hashes                                │
+│  STEP 5: Validate KYC level per document                        │
+│  STEP 6: Verify timestamp is reasonable                         │
+│  OUTPUT: STARK proof + public inputs (hashes only)              │
 └──────────────────────┬──────────────────────────────────────────┘
                        │ (Proof + hashes)
                        ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│           BARRETENBERG PROVER (compilado en Noir)                │
-│  • Genera polinomios de commitment                              │
-│  • Crea prueba STARK criptográfica                              │
-│  • Verifica localmente antes de retornar                        │
+│           BARRETENBERG PROVER (compiled in Noir)                 │
+│  • Generate commitment polynomials                              │
+│  • Create cryptographic STARK proof                             │
+│  • Verify locally before returning                              │
 └──────────────────────┬──────────────────────────────────────────┘
                        │ (STARK proof)
                        ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │     ON-CHAIN VERIFIER (zkpassport_verifier_contract.cairo)       │
-│  • Recibe: proof + public inputs (hashes)                       │
-│  • Verifica: prueba criptográficamente                          │
-│  • Almacena: kyc_level + hashes (NO datos personales)           │
-│  • Emite: evento de éxito                                       │
-│  • Retorna: status en transaction                               │
+│  • Receive: proof + public inputs (hashes)                      │
+│  • Verify: proof cryptographically                              │
+│  • Store: kyc_level + hashes (NO personal data)                 │
+│  • Emit: success event                                          │
+│  • Return: status in transaction                                │
 └──────────────────────┬──────────────────────────────────────────┘
                        │
                        ▼
-                   ✅ KYC Verificado
-              (Sin datos personales en-chain)
+                   ✅ KYC Verified
+              (No personal data on-chain)
 ```
 
 ---
 
-## Propiedades de Seguridad
+## Security Properties
 
-### ✅ Privacidad
-- Datos personales NUNCA se transmiten en red (solo hashes)
-- Imágenes NUNCA dejan el navegador (OCR client-side)
-- Hashes son irreversibles (Poseidon = 2^252 operaciones)
+### ✅ Privacy
+- Personal data NEVER transmitted on network (only hashes)
+- Images NEVER leave browser (client-side OCR)
+- Hashes are irreversible (Poseidon = 2^252 operations)
 
-### ✅ Integridad
-- MRZ validado con checksums MOD-97
-- Tampering detectable (falla checksum)
-- Formato ICAO Doc 9303 obligatorio
+### ✅ Integrity
+- MRZ validated with MOD-97 checksums
+- Tampering detectable (checksum fails)
+- ICAO Doc 9303 format mandatory
 
-### ✅ No-Repudiation
+### ✅ Non-Repudiation
 - Timestamps on-chain
-- KYC levels inmutables (solo upgrade)
-- Eventos auditables
+- KYC levels immutable (upgrade only)
+- Events auditable
 
 ### ✅ Anti-Replay
-- Cada proof tiene commitment único
-- Commitment usado no puede reutilizarse
-- Intento de replay falla claramente
+- Each proof has unique commitment
+- Used commitment cannot be reused
+- Replay attempt fails clearly
 
 ---
 
-## Timeline Estimado (Restante)
+## Estimated Timeline (Remaining)
 
 ```
-Hoy (Día 2.5):  ✅ Completado
+Today (Day 2.5):  ✅ Completed
   └─ Core implementation (40%)
 
-Día 3-4: Pruebas (1-2 días)
+Day 3-4: Testing (1-2 days)
   ├─ Noir circuit unit tests
   ├─ Cairo contract tests
   └─ E2E testing
 
-Día 4-5: Deployment (1-2 días)
+Day 4-5: Deployment (1-2 days)
   ├─ Sepolia account setup
   ├─ Contract declare
   └─ Contract deploy
 
-Día 5-7: Integración + Producción (1-2 días)
+Day 5-7: Integration + Production (1-2 days)
   ├─ Frontend integration
   ├─ Real data testing
   └─ Production hardening
 
-TOTAL: 5-7 días ✅ ON TRACK
+TOTAL: 5-7 days ✅ ON TRACK
 ```
 
 ---
 
-## Verificación de Estado Actual
+## Verify Current Status
 
 ```bash
-# Ver status de la implementación
+# Check implementation status
 cd /workspaces/treazury
 
-# Revisar builds
-ls zkpassport_verifier/target/dev/  # Debe estar lleno
+# Review builds
+ls zkpassport_verifier/target/dev/  # Should be populated
 
-# Ver commits recientes
+# View recent commits
 git log --oneline | head -5
 
-# Ver estructura de proyecto
+# View project structure
 tree -L 3 zkpassport_verifier/
 
-# Ver archivos de documentación
+# View documentation files
 ls -la *.md | grep ZKPASSPORT
 ```
 
 ---
 
-## Problemas Conocidos & Soluciones
+## Known Issues & Solutions
 
-⚠️ **Si nargo build falla**:
+⚠️ **If nargo build fails**:
 ```bash
-# Solución 1: Limpiar caché
+# Solution 1: Clear cache
 cd zkpassport_verifier
 rm -rf target
 nargo build
 
-# Solución 2: Check Nargo.toml
-cat Nargo.toml  # Debe tener: type = "lib"
+# Solution 2: Check Nargo.toml
+cat Nargo.toml  # Should have: type = "lib"
 ```
 
-⚠️ **Si scarb build falla**:
+⚠️ **If scarb build fails**:
 ```bash
-# Solución 1: Limpiar caché
+# Solution 1: Clear cache
 cd zkpassport_verifier
 scarb clean
 scarb build
 
-# Solución 2: Check events
-# Usar `#[derive(Drop, starknet::Event)]` en lugar de #[event]
+# Solution 2: Check events
+# Use `#[derive(Drop, starknet::Event)]` instead of #[event]
 ```
 
-⚠️ **Si OCR falla**:
+⚠️ **If OCR fails**:
 ```bash
-# Solución: Mejor calidad de imagen
-# Requisitos: imagen bien iluminada, MRZ clara, sin sombras
+# Solution: Better image quality
+# Requirements: well-lit image, clear MRZ, no shadows
 ```
 
 ---
 
-## Preguntas Frecuentes
+## Frequently Asked Questions
 
-**P: ¿Dónde está el circuit compilado?**
-R: `zkpassport_verifier/target/dev/zkpassport_verifier.sierra.json`
+**Q: Where is the compiled circuit?**
+A: `zkpassport_verifier/target/dev/zkpassport_verifier.sierra.json`
 
-**P: ¿Cómo ejecuto pruebas?**
-R: Ver `ZKPASSPORT_TESTING_PLAN.md` - Phase 1 para instrucciones completas
+**Q: How do I run tests?**
+A: See `ZKPASSPORT_TESTING_PLAN.md` - Phase 1 for complete instructions
 
-**P: ¿Cuándo deployar a mainnet?**
-R: Después de pruebas en Sepolia y auditoría de seguridad final
+**Q: When to deploy to mainnet?**
+A: After Sepolia testing and final security audit
 
-**P: ¿Qué pasa si un proof falla?**
-R: Contrato emite evento VerificationFailed, KYC no se asigna
+**Q: What happens if a proof fails?**
+A: Contract emits VerificationFailed event, KYC not assigned
 
-**P: ¿Se puede cambiar KYC level después?**
-R: Solo a nivel superior (no permite downgrades)
-
----
-
-## Contacto & Escalación
-
-Si encuentras problemas durante la próxima fase:
-
-1. **Compilación**: Check `Nargo.toml` y `Scarb.toml`
-2. **Tests**: Ver `ZKPASSPORT_TESTING_PLAN.md` Phase correspondiente
-3. **Deployment**: Verificar Sepolia RPC en `Scarb.toml`
-4. **Security**: Revisar `.sec/Audits/` para contexto
+**Q: Can KYC level be changed after?**
+A: Only to higher level (no downgrades allowed)
 
 ---
 
-## Resumen Ejecutivo
+## Escalation & Support
+
+If you encounter issues during next phase:
+
+1. **Compilation**: Check `Nargo.toml` and `Scarb.toml`
+2. **Tests**: See `ZKPASSPORT_TESTING_PLAN.md` corresponding phase
+3. **Deployment**: Verify Sepolia RPC in `Scarb.toml`
+4. **Security**: Review `.sec/Audits/` for context
+
+---
+
+## Executive Summary
 
 ```
-✅ ZKPassport Core = COMPLETADO
-   • Circuito Noir: Compilado
-   • Contrato Cairo: Compilado
-   • Documentación: Completa
-   • Tests: Plan listo
+✅ ZKPassport Core = COMPLETE
+   • Noir Circuit: Compiled
+   • Cairo Contract: Compiled
+   • Documentation: Complete
+   • Tests: Plan ready
 
-⏳ AHORA: Comenzar pruebas fase 1
+⏳ NOW: Begin Phase 1 testing
 
-📈 TIMELINE: On track (5-7 días total)
+📈 TIMELINE: On track (5-7 days total)
 
-🎯 META: KYC verificable sin datos personales on-chain
+🎯 GOAL: Verifiable KYC without personal data on-chain
 ```
 
 ---
 
-**Documento Creado**: December 4, 2025  
+**Document Created**: December 4, 2025  
 **Status**: ✅ Ready for Next Phase  
-**Siguiente Acción**: `nargo build && nargo test`  
-**Estimado de Conclusión**: 2-3 días
+**Next Action**: `nargo build && nargo test`  
+**Estimated Completion**: 2-3 days
