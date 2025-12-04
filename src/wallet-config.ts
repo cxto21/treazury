@@ -56,6 +56,25 @@ export function createProvider(network: Network = 'mainnet'): RpcProvider {
 }
 
 /**
+ * Normalizar nombre de wallet para mostrar correctamente
+ * Las versiones antiguas pueden devolver nombres inconsistentes
+ */
+function normalizeWalletName(wallet: any): string {
+  if (!wallet) return 'Unknown';
+  
+  const id = wallet.id?.toLowerCase() || '';
+  const name = wallet.name?.toLowerCase() || '';
+  
+  // Mapear IDs y nombres a nombres normalizados
+  if (id.includes('argentx') || name.includes('argent')) return 'Argent X';
+  if (id.includes('braavos') || name.includes('braavos')) return 'Braavos';
+  if (id.includes('ready') || name.includes('ready')) return 'Ready';
+  
+  // Si no coincide con ninguno conocido, devolver el nombre original
+  return wallet.name || 'Unknown';
+}
+
+/**
  * Browser-only: Connect to Starknet wallet
  * Returns Account if connected, null if cancelled
  */
@@ -117,7 +136,7 @@ export async function connectWallet(): Promise<Account | null> {
           console.log('[wallet-config] ✅ ArgentX connected:', argentX.account.address);
           
           if (statusEl) {
-            statusEl.textContent = 'ArgentX connected';
+            statusEl.textContent = 'Argent X connected';
             statusEl.className = 'status success';
           }
           
@@ -186,8 +205,9 @@ export async function connectWallet(): Promise<Account | null> {
 
     console.log('[wallet-config] ✅ Wallet connected successfully via modal:', wallet.account.address);
     
+    const normalizedName = normalizeWalletName(wallet);
     if (statusEl) {
-      statusEl.textContent = `${wallet.name} connected`;
+      statusEl.textContent = `${normalizedName} connected`;
       statusEl.className = 'status success';
     }
     
