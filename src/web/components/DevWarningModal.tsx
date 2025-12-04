@@ -50,17 +50,17 @@ const DevWarningModal: React.FC<DevWarningModalProps> = ({ onAccept }) => {
 
         {/* Content */}
         <div className="px-6 py-6 space-y-4">
-          <div className="space-y-3 text-gray-300">
-            <p className="text-lg font-semibold text-neon-white">
+          <div className="space-y-3">
+            <p className="text-lg font-semibold text-black dark:text-white">
               This site is in development and testing phase
             </p>
             
-            <div className="border border-gray-800 dark:border-gray-200 rounded-md p-4 space-y-2 bg-gray-50/10 dark:bg-white/5">
+            <div className="border border-gray-600 dark:border-gray-400 rounded-md p-4 space-y-2 bg-gray-100/5 dark:bg-white/5">
               <p className="text-black dark:text-white font-bold flex items-center gap-2">
                 <span className="text-2xl">⚠️</span>
                 IMPORTANT WARNINGS:
               </p>
-              <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
+              <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-900 dark:text-gray-100">
                 <li>Only works on <strong className="text-black dark:text-white">Ztarknet Testnet</strong></li>
                 <li>DO NOT use real funds - testnet tokens only</li>
                 <li>Errors, bugs, or data loss may occur</li>
@@ -69,8 +69,8 @@ const DevWarningModal: React.FC<DevWarningModalProps> = ({ onAccept }) => {
               </ul>
             </div>
 
-            <div className="border border-gray-700 rounded-md p-4 space-y-2">
-              <p className="text-gray-300 font-semibold flex items-center gap-2">
+            <div className="border border-gray-600 dark:border-gray-400 rounded-md p-4 space-y-2 bg-gray-100/5 dark:bg-white/5">
+              <p className="text-gray-900 dark:text-white font-semibold flex items-center gap-2">
                 <span className="text-xl">ℹ️</span>
                 Get testnet tokens:
               </p>
@@ -78,31 +78,31 @@ const DevWarningModal: React.FC<DevWarningModalProps> = ({ onAccept }) => {
                 href="https://faucet.ztarknet.cash" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-block text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 underline text-sm transition-colors"
+                className="inline-block text-gray-900 dark:text-white hover:text-black dark:hover:text-gray-100 underline text-sm transition-colors font-semibold"
               >
                 🚰 Ztarknet Faucet →
               </a>
             </div>
 
-            <div className="border border-gray-800 rounded-md p-3 bg-black/30">
-              <p className="text-xs text-gray-500 font-mono">
-                <strong className="text-gray-400">Contract:</strong> TreazuryVault v2.0<br />
-                <strong className="text-gray-400">Network:</strong> Ztarknet Testnet<br />
-                <strong className="text-gray-400">Status:</strong> MVP - Minimum Viable Product
+            <div className="border border-gray-600 dark:border-gray-400 rounded-md p-3 bg-gray-100/5 dark:bg-white/5">
+              <p className="text-xs text-gray-900 dark:text-gray-100 font-mono">
+                <strong className="text-gray-900 dark:text-gray-100">Contract:</strong> TreazuryVault v2.0<br />
+                <strong className="text-gray-900 dark:text-gray-100">Network:</strong> Ztarknet Testnet<br />
+                <strong className="text-gray-900 dark:text-gray-100">Status:</strong> MVP - Minimum Viable Product
               </p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="bg-cyber-gray/30 border-t border-cyan-500/20 px-6 py-4 flex items-center justify-between">
-          <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer group">
+        <div className="bg-white/5 dark:bg-black/5 border-t border-gray-600 dark:border-gray-400 px-6 py-4 flex items-center justify-between">
+          <label className="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100 cursor-pointer group">
             <input 
               type="checkbox" 
-              className="w-4 h-4 rounded border-gray-600 bg-cyber-black text-cyan-500 focus:ring-cyan-500 focus:ring-offset-0"
+              className="w-4 h-4 rounded border-gray-400 dark:border-gray-600 bg-white dark:bg-black text-black dark:text-white focus:ring-gray-500 focus:ring-offset-0"
               defaultChecked
             />
-            <span className="group-hover:text-gray-300 transition-colors">Don't show again</span>
+            <span className="group-hover:text-black dark:group-hover:text-gray-200 transition-colors">Don't show again</span>
           </label>
 
           <button
