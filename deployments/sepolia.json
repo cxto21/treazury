@@ -4,6 +4,15 @@
   "deployer_account": "0x771d5e7e86ab8324bb10c46e2d0d5a4c1876fe5154b84d46bef3550a9eb8e95",
   "last_updated": "2025-12-01T04:40:00Z",
   "contracts": {
+    "ZKPassportVerifier": {
+      "class_hash": "PENDING_DEPLOYMENT",
+      "address": "PENDING_DEPLOYMENT",
+      "declaration_tx": "PENDING_DEPLOYMENT",
+      "deployment_tx": "PENDING_DEPLOYMENT",
+      "artifact": "zkpassport_verifier/target/release/zkpassport_verifier_zkpassport_verifier.compiled_contract_class.json",
+      "status": "Ready for D4 deployment",
+      "deployment_step": "Execute: cd zkpassport_verifier && scarb build && sncast --profile sepolia declare && sncast --profile sepolia deploy"
+    },
     "UltraKeccakHonkVerifier": {
       "class_hash": "0x0452c8c1056191135eda331133447090237687dbc1526db2c54175cbd7506d4",
       "address": "0x022b20fef3764d09293c5b377bc399ae7490e60665797ec6654d478d74212669",
