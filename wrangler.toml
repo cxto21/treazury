@@ -1,11 +1,17 @@
-# Cloudflare Pages configuration
-# This file is optional but helps with consistent deployments
+# Cloudflare Pages configuration for Treazury
+# Updated: December 4, 2025
 
-name = "tongo-ukraine"
+name = "treazury"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
+# Production environment
 [env.production]
-name = "tongo-ukraine"
+name = "treazury"
 pages_build_output_dir = "dist"
+
+# Environment variables (set via Cloudflare Dashboard)
+# STARKNET_RPC=https://ztarknet-madara.d.karnot.xyz
+# TREAZURY_VAULT_ADDRESS=0x04cbe8011bddc3fa7d7832db096122f3ec5bb937f5bf5b3db852319664239196
+# NETWORK=ztarknet-testnet
 
