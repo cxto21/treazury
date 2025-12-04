@@ -1,47 +1,38 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
-export default defineConfig({
-  root: './src/web',
-  publicDir: '../../public',
-  build: {
-    outDir: '../../dist',
-    emptyOutDir: true,
-    rollupOptions: {
-      external: (id) => {
-        // Don't bundle config.ts in browser (it uses Node.js crypto)
-        if (id.includes('/config.ts') || id.includes('\\config.ts')) {
-          return true;
-        }
-        return false;
-      }
-    }
-  },
-  server: {
-    port: 8080,
-    open: true,
-    cors: true,
-  },
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-      // Allow importing from dist folder of tongo-sdk
-      '@fatsolutions/tongo-sdk/dist/types.js': resolve(__dirname, './node_modules/@fatsolutions/tongo-sdk/dist/types.js')
-    },
-    dedupe: []
-  },
-  optimizeDeps: {
-    include: ['@fatsolutions/tongo-sdk', '@fatsolutions/tongo-sdk/dist/types.js', 'get-starknet'],
-    exclude: ['crypto', 'dotenv'] // Exclude Node.js modules from browser bundle
-  },
-  define: {
-    // Replace Node.js globals with browser-safe versions
-    'process.env': '{}',
-    'global': 'globalThis'
-  },
-  ssr: {
-    // Don't externalize these for SSR (we're not using SSR, but good to have)
-    noExternal: ['@fatsolutions/tongo-sdk']
-  },
-  plugins: [],
-});
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
 
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, '.', '');
+    return {
+      server: {
+        port: 3000,
+        host: '0.0.0.0',
+      },
+      plugins: [react()],
+      define: {
+        'process.env.API_KEY': JSON.stringify(env.API_KEY || ''),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+        'process.env.STARKNET_RPC': JSON.stringify(env.STARKNET_RPC || 'https://starknet-sepolia.public.blastapi.io'),
+        'process.env.ZKPASSPORT_CONTRACT': JSON.stringify(env.ZKPASSPORT_CONTRACT || ''),
+      },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, './src'),
+        }
+      },
+      build: {
+        // Optimizar para Cloudflare Pages
+        outDir: 'dist',
+        target: 'esnext',
+        minify: 'terser',
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'react': ['react', 'react-dom'],
+            }
+          }
+        }
+      }
+    };
+});

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treazury.xyz - ZK Privacy Treasury</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { 
+            mono: ['Orbitron', 'monospace'] 
+          },
+          colors: {
+            'cyber-black': '#050505',
+            'cyber-gray': '#121212',
+            'neon-white': '#FFFFFF',
+            'ink-black': '#1a1a1a',
+          },
+          animation: {
+            'hex-open': 'hexOpen 2s ease-out forwards',
+            'loading-bar': 'hexLoad 2.5s ease-out forwards',
+            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'glitch': 'glitch 0.3s infinite',
+          },
+          dropShadow: {
+            'neon': '0 0 4px rgba(255, 255, 255, 0.4)',
+            'neon-strong': '0 0 8px rgba(255, 255, 255, 0.6)',
+            'ink': '0 0 2px rgba(0, 0, 0, 0.3)',
+            'ink-strong': '0 0 6px rgba(0, 0, 0, 0.5)',
+          },
+          boxShadow: {
+            'neon': '0 0 8px rgba(255, 255, 255, 0.2)',
+            'ink': '0 0 8px rgba(0, 0, 0, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Animations & Global Styles -->
+  <style>
+    body {
+      margin: 0;
+      overflow-x: hidden;
+    }
+    
+    @keyframes hexOpen {
+      0% { transform: scale(0.1) rotate(0deg); opacity: 0; }
+      50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+      100% { transform: scale(1) rotate(360deg); }
+    }
+    
+    @keyframes hexLoad { 
+      0% { width: 0%; } 
+      100% { width: 100%; } 
+    }
+
+    @keyframes glitch { 
+      0%,100% { transform: translate(0); }
+      10% { transform: translate(-1px, 1px); }
+      20% { transform: translate(1px, -1px); } 
+    }
+
+    @keyframes scanline { 
+      0%,100% { opacity: 0.1; }
+      50% { opacity: 0.3; } 
+    }
+
+    .scanline-overlay {
+      background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px);
+      animation: scanline 2s infinite;
+      pointer-events: none;
+    }
+
+    /* Hexagon Clip Path Utility */
+    .hex-clip {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    }
+
+    .glitch-hover:hover {
+      animation: glitch 0.3s infinite;
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
+  }
+}
+</script>
+</head>
+<body class="bg-gray-200 dark:bg-cyber-black text-ink-black dark:text-white font-mono antialiased min-h-screen transition-colors duration-300">
+  <div id="root"></div>
+</body>
+</html>

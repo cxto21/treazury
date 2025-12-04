@@ -2,10 +2,13 @@ import { Account as TongoAccount } from '@fatsolutions/tongo-sdk';
 import { Account, Call, RpcProvider } from 'starknet';
 import { TongoDonationState, TongoOperation } from './types';
 
-// Import pubKeyBase58ToAffine from the dist folder
-// Note: This is a workaround since the package doesn't export it from the main entry
-// Vite will resolve this with proper configuration
-import { pubKeyBase58ToAffine } from '@fatsolutions/tongo-sdk/dist/types.js';
+// TODO: Fix pubKeyBase58ToAffine import from tongo-sdk
+// Placeholder function until we resolve the import issue
+const pubKeyBase58ToAffine = (base58: string) => {
+  // This is a placeholder - should import from tongo-sdk
+  console.warn('pubKeyBase58ToAffine is not implemented yet');
+  return { x: BigInt(0), y: BigInt(0) };
+};
 
 /**
  * Pads a Starknet address to 66 characters (0x + 64 hex digits).
