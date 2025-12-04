@@ -61,6 +61,68 @@ donation_commitment = "${commitment}"
         return new Response(JSON.stringify({ error: error.message || String(error), success: false }), { headers, status: 500 });
       }
     }
+
+    if (req.method === "POST" && req.url.includes("/api/zkpassport/generate-proof")) {
+      try {
+        const body = await req.json();
+        const { nationality, documentNumber, dateOfBirth } = body;
+        
+        console.log("[ZKPassport API] Generating proof for:", {
+          nationality,
+          docNumber: documentNumber.slice(0, 3) + '***',
+          dob: dateOfBirth,
+        });
+
+        // Validate input
+        if (!nationality || !documentNumber || !dateOfBirth) {
+          return new Response(
+            JSON.stringify({ error: 'Missing required fields', success: false }),
+            { headers, status: 400 }
+          );
+        }
+
+        // Hash sensitive data using Poseidon
+        const p = await getPoseidon();
+        const nationalityHash = p([...Buffer.from(nationality, 'utf-8')].map(BigInt));
+        const dobHash = p([...Buffer.from(dateOfBirth, 'utf-8')].map(BigInt));
+
+        const nationalityHashStr = p.F.toString(nationalityHash);
+        const dobHashStr = p.F.toString(dobHash);
+
+        console.log("[ZKPassport API] Computed hashes:", {
+          nationalityHash: nationalityHashStr.slice(0, 10) + '...',
+          dobHash: dobHashStr.slice(0, 10) + '...',
+        });
+
+        // TODO: Generate actual ZK proof using Noir circuit
+        // For now, return mock proof structure
+        const mockProof = [
+          '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+          '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+          '0x567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234',
+        ];
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            proof: mockProof,
+            publicInputs: {
+              nationalityHash: nationalityHashStr,
+              dobHash: dobHashStr,
+              timestamp: Date.now(),
+            },
+          }),
+          { headers }
+        );
+      } catch (error: any) {
+        console.error("[ZKPassport API] Error:", error.message || error);
+        return new Response(
+          JSON.stringify({ error: error.message || String(error), success: false }),
+          { headers, status: 500 }
+        );
+      }
+    }
+
     return new Response(JSON.stringify({ error: "Not found" }), { headers, status: 404 });
   },
 });

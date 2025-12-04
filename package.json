@@ -37,10 +37,13 @@
     "@starknet-io/types-js": "^0.9.2",
     "circomlibjs": "^0.1.7",
     "dotenv": "^17.2.3",
+    "mrz": "^5.0.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "react-webcam": "^7.2.0",
     "starknet": "^8.9.1",
-    "starknetkit": "3.4.0"
+    "starknetkit": "3.4.0",
+    "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",

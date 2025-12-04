@@ -409,21 +409,28 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
 
             {/* Vault Paused Warning */}
             {vaultPaused && (
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/50 rounded-2xl text-yellow-600 dark:text-yellow-400 text-sm font-mono">
+              <div className="p-4 bg-gray-200/50 dark:bg-gray-800/50 border border-gray-400 dark:border-gray-600 rounded-2xl text-gray-900 dark:text-gray-100 text-sm font-mono">
                 ⚠️ Vault is paused. Transfers temporarily disabled.
+              </div>
+            )}
+
+            {/* KYC Required Warning */}
+            {!isZKVerified && (
+              <div className="p-4 bg-gray-200/50 dark:bg-gray-800/50 border border-gray-400 dark:border-gray-600 rounded-2xl text-gray-900 dark:text-gray-100 text-sm font-mono">
+                ⚠️ KYC VERIFICATION REQUIRED: Complete identity verification before transferring
               </div>
             )}
             
             <button 
               onClick={handleTransfer}
-              disabled={isProcessing}
+              disabled={isProcessing || !isZKVerified || vaultPaused}
               className={`w-full group relative overflow-hidden bg-black dark:bg-black/60 
                        border border-transparent dark:border-white/50 hover:border-black dark:hover:border-white hover:shadow-ink dark:hover:shadow-neon text-white font-black py-6 rounded-2xl uppercase 
                        tracking-widest text-sm md:text-lg transition-all transform hover:scale-[1.01]
-                       ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                       ${isProcessing || !isZKVerified || vaultPaused ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span className="relative z-10 flex items-center justify-center drop-shadow-neon">
-                {isProcessing ? (txStatus || 'PROCESSING...') : '▶ GENERATE ZK PROOF + TRANSFER'}
+                {!isZKVerified ? '🔒 VERIFY KYC FIRST' : isProcessing ? (txStatus || 'PROCESSING...') : '▶ GENERATE ZK PROOF + TRANSFER'}
               </span>
               <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
             </button>
