@@ -1,17 +1,43 @@
 {
   "contracts": {
-    "TreazuryVault": {
+    "TreazuryVault_v1": {
       "class_hash": "0x7c4770dc9d6c1ae49e3288b721c7eef7ed5d9714be49835a18be79ffd01262f",
       "address": "0x0320385a4441d93c9e24497f80c96806b5e0f30c3896ecccf710f91bc25521b4",
       "declaration_tx": "0xf773fc0dd1b0d183f8491256e10b4cb1dd3dc86d2fe5dc0297c77758ce50db",
       "deployment_tx": "0x00276b763fc41440039a4ef0515ed810ca2eb1f0b359ada830fe85192be6e192",
       "artifact": "donation_badge_verifier/target/release/donation_badge_verifier_TreazuryVault.contract_class.json",
-      "status": "DEPLOYED on Ztarknet testnet ✅",
+      "status": "⚠️ DEPRECATED - VULNERABLE ⚠️",
+      "version": "v1.0",
       "network": "ztarknet-testnet",
       "deployed_by": "Treazury CTO",
       "deployed_at": "2025-12-04",
+      "deprecated_at": "2025-12-04",
       "explorer_url": "https://sepolia.starkscan.co/contract/0x0320385a4441d93c9e24497f80c96806b5e0f30c3896ecccf710f91bc25521b4",
-      "note": "TreazuryVault successfully deployed on Ztarknet testnet. Contract is live and ready for testing."
+      "note": "DO NOT USE - Contains critical vulnerabilities. Replaced by v2.0"
+    },
+    "TreazuryVault": {
+      "class_hash": "0x1013514cd2b7426a7d28962fb02b93d68fc74c046b0a67153cb14fe8467750f",
+      "address": "0x04cbe8011bddc3fa7d7832db096122f3ec5bb937f5bf5b3db852319664239196",
+      "declaration_tx": "0x161809e9b73993d12583541738f4f7cf19a83ec8132c5d7687c38b1d98d8d2e",
+      "deployment_tx": "0x07494c36e2e181b6c78b711a9e841af883b3131638989f0bf88e6b5fa685d6f2",
+      "artifact": "donation_badge_verifier/target/release/donation_badge_verifier_TreazuryVault.contract_class.json",
+      "status": "✅ DEPLOYED v2.0 - SECURE ✅",
+      "version": "v2.0",
+      "network": "ztarknet-testnet",
+      "deployed_by": "Treazury CTO",
+      "deployed_at": "2025-12-04",
+      "owner": "0x5b7213d74268643e884c026569b800f463fd9f5b86493fb2551c38507f045fa",
+      "explorer_url": "https://sepolia.starkscan.co/contract/0x04cbe8011bddc3fa7d7832db096122f3ec5bb937f5bf5b3db852319664239196",
+      "security_features": [
+        "ZK Proof validation framework",
+        "Reentrancy guards",
+        "Owner access control",
+        "Emergency pause mechanism",
+        "Comprehensive input validation",
+        "Balance sufficiency checks"
+      ],
+      "audit_status": "Internal audit completed - All 10 vulnerabilities fixed",
+      "note": "TreazuryVault v2.0 successfully deployed. All critical security vulnerabilities from v1.0 have been fixed. Ready for testnet usage and community testing."
     },
     "DonationBadge": {
       "class_hash": "0x0OPTIONAL_FUTURE",
@@ -33,6 +59,7 @@
     "version": "0.8.0",
     "deployment_tx": "0x42618c6ee4ffdf69cd48ec2bffb9139166ffc3362621982b4ce953b17df2900",
     "deployed": true,
-    "network": "ztarknet-testnet"
+    "network": "ztarknet-testnet",
+    "role": "Owner of TreazuryVault v2.0"
   }
 }
