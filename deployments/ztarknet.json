@@ -1,0 +1,38 @@
+{
+  "contracts": {
+    "TreazuryVault": {
+      "class_hash": "0x7c4770dc9d6c1ae49e3288b721c7eef7ed5d9714be49835a18be79ffd01262f",
+      "address": "0x0PENDING_DEPLOYMENT",
+      "declaration_tx": "0xf773fc0dd1b0d183f8491256e10b4cb1dd3dc86d2fe5dc0297c77758ce50db",
+      "deployment_tx": "0x0PENDING",
+      "artifact": "donation_badge_verifier/target/release/donation_badge_verifier_TreazuryVault.contract_class.json",
+      "status": "Declared on Sepolia (needs re-declaration on Ztarknet)",
+      "deployment_step": "sncast deploy --class-hash 0x7c4770... --url https://ztarknet-madara.d.karnot.xyz",
+      "network": "sepolia (should be ztarknet-testnet)",
+      "deployed_by": "Treazury CTO",
+      "deployed_at": "2025-12-04T10:45:00Z",
+      "note": "Contract was declared on Sepolia instead of Ztarknet. Need to redeclare on Ztarknet testnet."
+    },
+    "DonationBadge": {
+      "class_hash": "0x0OPTIONAL_FUTURE",
+      "address": "0x0OPTIONAL_FUTURE",
+      "status": "Not required for MVP",
+      "note": "Badge/KYC can be added in D5 if compliance gating is needed"
+    }
+  },
+  "network_config": {
+    "name": "ztarknet-testnet",
+    "rpc": "https://ztarknet-madara.d.karnot.xyz",
+    "chain_id": "ZTARKNET",
+    "explorer": "https://explorer.ztarknet.cash/",
+    "faucet": "https://faucet.ztarknet.cash/"
+  },
+  "account": {
+    "address": "0x5b7213d74268643e884c026569b800f463fd9f5b86493fb2551c38507f045fa",
+    "type": "OpenZeppelin Account",
+    "version": "0.8.0",
+    "deployment_tx": "0x42618c6ee4ffdf69cd48ec2bffb9139166ffc3362621982b4ce953b17df2900",
+    "deployed": true,
+    "network": "ztarknet-testnet"
+  }
+}

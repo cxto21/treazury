@@ -2,5 +2,9 @@
 url = "https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_10/cf52O0RwFy1mEB0uoYsel"
 account = "deployer"
 
+[sncast.ztarknet]
+account = "ztarknet"
+url = "https://ztarknet-madara.d.karnot.xyz"
+
 [sncast.default]
-account = "deployer"
+account = "ztarknet"

@@ -1,7 +1,33 @@
-# Unified Makefile with expected Oz Kit targets
+# Treazury Makefile
+# Based on Ztarknet quickstart, adapted for Treazury deployment
+# Supports account management and contract deployment on Ztarknet
 
 .PHONY: install-all install-noir install-scarb install-barretenberg install-sncast \
-	setup verify uninstall account-create account-deploy account-balance account-topup
+	setup verify uninstall account-create account-deploy account-balance account-topup \
+	contract-build contract-declare contract-deploy dev build test help
+
+help:
+	@echo "=== Treazury Development Commands ==="
+	@echo ""
+	@echo "Installation:"
+	@echo "  make install-all         Install all dependencies"
+	@echo ""
+	@echo "Account Management (Ztarknet):"
+	@echo "  make account-create      Create OpenZeppelin account"
+	@echo "  make account-deploy      Deploy account to Ztarknet"
+	@echo "  make account-topup       Claim ZTK from faucet"
+	@echo "  make account-balance     Check account balance"
+	@echo ""
+	@echo "Contract Deployment:"
+	@echo "  make contract-build      Compile TreazuryVault"
+	@echo "  make contract-declare    Declare contract on Ztarknet"
+	@echo "  make contract-deploy     Deploy contract instance"
+	@echo ""
+	@echo "Development:"
+	@echo "  make dev                 Start dev server"
+	@echo "  make build               Build for production"
+	@echo "  make test                Run tests"
+	@echo ""
 
 # Installer targets (expected by scripts/verify.sh)
 install-sncast:
@@ -71,3 +97,33 @@ account-balance:
 	sncast balance \
 		--token-address $(FEE_TOKEN_ADDRESS) \
 		--url $(URL)
+
+# Contract deployment targets
+contract-build:
+	@echo "Building TreazuryVault contract..."
+	cd donation_badge_verifier && scarb build --release
+	@echo "✓ TreazuryVault compiled successfully"
+
+contract-declare:
+	@echo "Declaring TreazuryVault on Ztarknet..."
+	sncast --profile $(ACCOUNT_NAME) declare \
+		--contract donation_badge_verifier/target/release/donation_badge_verifier_TreazuryVault.contract_class.json \
+		--url $(URL)
+	@echo "✓ Contract declared. Note the class_hash for deployment."
+
+contract-deploy:
+	@read -p "Enter class_hash from contract-declare: " CLASS_HASH; \
+	echo "Deploying TreazuryVault to Ztarknet..."; \
+	sncast --profile $(ACCOUNT_NAME) deploy $$CLASS_HASH \
+		--url $(URL)
+	@echo "✓ Contract deployed. Update deployments/ztarknet.json with contract address."
+
+# Development targets
+dev:
+	bun run dev
+
+build:
+	bun run build
+
+test:
+	bun run test

@@ -1,2 +1,6 @@
 [sncast.sepolia]
 url = "https://starknet-sepolia.public.blastapi.io/rpc/v0_7"
+
+[sncast.ztarknet]
+account = "ztarknet"
+url = "https://ztarknet-madara.d.karnot.xyz"
