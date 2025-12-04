@@ -14,6 +14,8 @@
     "demo": "bun run build && bun run dist/demo.js",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "deploy": "bun run build:deploy && npx wrangler pages deploy dist --project-name=tongo-ukraine",
     "deploy:login": "npx wrangler login",
     "deploy:build": "bun run build:deploy"
@@ -44,8 +46,10 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/ui": "^4.0.15",
     "terser": "^5.44.1",
     "typescript": "^5.9.3",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^4.0.15"
   }
 }
