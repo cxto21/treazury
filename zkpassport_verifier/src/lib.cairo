@@ -1,6 +1,5 @@
 // zkpassport_verifier/src/lib.cairo
-// Placeholder del verificador KYC: define interfaz verify_kyc
-
-%lang starknet
+// ZKPassport module library
 
 mod zkpassport_verifier;
+mod mrz_validator;

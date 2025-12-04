@@ -1,0 +1,24 @@
+// Test witness for ZKPassport circuit
+// This file provides test inputs for the circuit
+
+nationality = "USA"
+document_number = "N1234567"
+date_of_birth = "920315"
+sex = 77  // 'M'
+document_expiry = "261231"
+
+// MRZ lines (ICAO Doc 9303 format)
+// Example passport MRZ:
+// P<USADOE00000002<<<<<<<<<<<<<<<<<<<<<<<<
+// 9203150M2612315USA<<<<<<<<<<<<<<<<<<<<<6
+
+mrz_line_1 = "P<USADOE00000002<<<<<<<<<<<<<<<<<<<<<<<<<<"
+mrz_line_2 = "9203150M2612315USA<<<<<<<<<<<<<<<<<<<<<6"
+
+// Public inputs (these are what go on-chain)
+nationality_hash = 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+dob_hash = 0x2345678901bcdef2345678901bcdef2345678901bcdef2345678901bcdef234567
+doc_hash = 0x3456789012cdef3456789012cdef3456789012cdef3456789012cdef3456789012
+kyc_level = 1  // Basic KYC
+verification_timestamp = 1702732800  // Dec 4, 2025
+document_type = 0  // Passport
