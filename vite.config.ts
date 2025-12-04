@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => {
           output: {
             manualChunks: {
               'react': ['react', 'react-dom'],
-              'starknet': ['starknet', 'get-starknet'],
+              'starknet': ['starknet'],
             }
           }
         }

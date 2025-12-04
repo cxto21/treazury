@@ -4,7 +4,7 @@
  */
 
 import { Contract, RpcProvider, Account, cairo, num } from 'starknet';
-import type { StarknetWindowObject } from 'get-starknet-core';
+import type { StarknetWindowObject } from '@starknet-io/types-js';
 
 // Contract addresses from deployment
 const TREAZURY_VAULT_ADDRESS = '0x04cbe8011bddc3fa7d7832db096122f3ec5bb937f5bf5b3db852319664239196';

@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import type { StarknetWindowObject } from 'get-starknet-core';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import type { StarknetWindowObject } from '@starknet-io/types-js';
 import { TransferFormState, Theme } from '../types';
 import ZKPassportModal from './ZKPassportModal';
 import { getEncryptedBalance, transfer, isVaultPaused, formatUSDC } from '../vault-service';

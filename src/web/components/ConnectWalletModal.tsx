@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { connect, disconnect } from 'get-starknet';
-import type { StarknetWindowObject } from 'get-starknet-core';
+import React, { useState } from 'react';
+import { connect, disconnect } from 'starknetkit';
+import type { StarknetWindowObject } from '@starknet-io/types-js';
 
 interface ConnectWalletModalProps {
   onConnected: (wallet: StarknetWindowObject) => void;
@@ -16,18 +16,28 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) 
     setError(null);
     
     try {
-      // Use get-starknet to connect to wallet
-      const wallet = await connect({ 
+      const { wallet } = await connect({
         modalMode: "neverAsk",
         modalTheme: "dark",
-        ...(walletId && { include: [walletId] })
+        webWalletUrl: "https://web.argent.xyz",
+        argentMobileOptions: {
+          dappName: "Treazury",
+          url: window.location.hostname,
+        },
+        ...(walletId && { 
+          connectors: walletId === 'argentX' 
+            ? ['argentX'] 
+            : walletId === 'braavos' 
+            ? ['braavos'] 
+            : undefined 
+        })
       });
       
       if (!wallet) {
         throw new Error('No wallet found. Please install Argent X or Braavos.');
       }
 
-      // Enable wallet and get account
+      // Enable wallet
       await wallet.enable({ starknetVersion: "v5" });
       
       if (!wallet.isConnected) {
@@ -35,6 +45,41 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) 
       }
 
       // Wait a moment for connection to stabilize
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      onConnected(wallet);
+    } catch (err) {
+      console.error('Wallet connection error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to connect wallet');
+      setIsConnecting(false);
+    }
+  };
+
+  const handleConnectAny = async () => {
+    setIsConnecting(true);
+    setError(null);
+    
+    try {
+      const { wallet } = await connect({
+        modalMode: "alwaysAsk",
+        modalTheme: "dark",
+        webWalletUrl: "https://web.argent.xyz",
+        argentMobileOptions: {
+          dappName: "Treazury",
+          url: window.location.hostname,
+        }
+      });
+      
+      if (!wallet) {
+        throw new Error('No wallet selected');
+      }
+
+      await wallet.enable({ starknetVersion: "v5" });
+      
+      if (!wallet.isConnected) {
+        throw new Error('Failed to connect to wallet');
+      }
+
       await new Promise(resolve => setTimeout(resolve, 500));
       
       onConnected(wallet);

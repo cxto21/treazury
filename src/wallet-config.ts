@@ -1,5 +1,5 @@
 import { RpcProvider, Account } from 'starknet';
-import type { StarknetWindowObject } from 'get-starknet';
+import type { StarknetWindowObject } from '@starknet-io/starknetkit';
 
 /**
  * Network configuration for Starknet
@@ -61,33 +61,7 @@ export function createProvider(network: Network = 'mainnet'): RpcProvider {
  */
 const WALLET_CONNECTION_TIMEOUT = 30000; // 30 seconds
 
-// Cache get-starknet module to avoid re-imports (faster)
-let cachedConnect: any = null;
-let cachedDisconnect: any = null;
-let moduleInitialized = false;
-
-// Pre-initialize get-starknet module on page load (faster wallet detection)
-async function initializeGetStarknet() {
-  if (!cachedConnect || !cachedDisconnect) {
-    console.log('[wallet-config] Initializing get-starknet module...');
-    const startTime = Date.now();
-    const module = await import('get-starknet');
-    cachedConnect = module.connect;
-    cachedDisconnect = module.disconnect;
-    const loadTime = Date.now() - startTime;
-    console.log(`[wallet-config] get-starknet module cached (took ${loadTime}ms)`);
-    moduleInitialized = true;
-  }
-  return { connect: cachedConnect, disconnect: cachedDisconnect };
-}
-
-// Pre-load module when this file is imported (in browser)
-if (typeof window !== 'undefined') {
-  // Initialize in background, don't wait for it
-  initializeGetStarknet().catch(err => {
-    console.warn('[wallet-config] Failed to pre-initialize get-starknet:', err);
-  });
-}
+// starknetkit no requiere inicialización manual ni caché
 
 export async function connectWallet(): Promise<Account | null> {
   if (typeof window === 'undefined') {
@@ -104,7 +78,7 @@ export async function connectWallet(): Promise<Account | null> {
       statusEl.className = 'status loading';
     }
     
-    // ✅ FIX: Try Braavos FIRST (directly), then fall back to get-starknet modal
+    // ✅ FIX: Try Braavos FIRST (directly), then fall back to starknetkit modal
     const braavos = (window as any).starknet_braavos;
     
     if (braavos) {
@@ -155,48 +129,23 @@ export async function connectWallet(): Promise<Account | null> {
       }
     }
     
-    // Last resort: Use get-starknet modal
-    console.log('[wallet-config] Using get-starknet modal (no direct wallet found)...');
+    // Último recurso: usar starknetkit modal
+    console.log('[wallet-config] Using starknetkit modal (no direct wallet found)...');
     
     if (statusEl) {
       statusEl.textContent = 'Opening wallet modal...';
       statusEl.className = 'status loading';
     }
     
-    const { connect } = await initializeGetStarknet();
-    if (!connect || typeof connect !== 'function') {
-      throw new Error('get-starknet connect function not found. Make sure get-starknet is installed: bun add get-starknet');
-    }
-    
-    // Create timeout promise
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Wallet connection timed out after 30 seconds. Ready wallet is slow - try Braavos instead.'));
-      }, WALLET_CONNECTION_TIMEOUT);
-    });
-
-    // Only show Braavos and Argent X
-    const connectOptions: any = {
-      include: ['braavos', 'argentX'],
-      modalMode: 'alwaysAsk' as const,
-      modalTheme: 'dark' as const
-    };
-    
-    // Try to add exclude if supported
-    try {
-      connectOptions.exclude = ['keplr', 'okx', 'xdefi', 'ready'];
-    } catch (e) {
-      // exclude not supported, that's okay
-    }
-    
-    console.log('[wallet-config] Calling connect with options:', connectOptions);
-    
-    // Race between actual connection and timeout
+    // Usar starknetkit para el modal de conexión
+    const { connect } = await import('@starknet-io/starknetkit');
     const connectStartTime = Date.now();
-    const wallet = await Promise.race([
-      connect(connectOptions),
-      timeoutPromise
-    ]);
+    const wallet = await connect({
+      include: ['braavos', 'argentX'],
+      modalMode: 'alwaysAsk',
+      modalTheme: 'dark',
+      exclude: ['keplr', 'okx', 'xdefi', 'ready']
+    });
     const connectTime = Date.now() - connectStartTime;
     console.log(`[wallet-config] Connect completed in ${connectTime}ms`);
     
@@ -269,7 +218,7 @@ export async function disconnectWallet(): Promise<void> {
   }
 
   try {
-    const { disconnect } = await initializeGetStarknet();
+    const { disconnect } = await import('@starknet-io/starknetkit');
     if (disconnect) {
       await disconnect();
     }
@@ -294,15 +243,13 @@ export async function getConnectedAccount(): Promise<Account | null> {
       return starknet.account as Account;
     }
 
-    // Otherwise try get-starknet (slower but more reliable)
-    const { connect } = await initializeGetStarknet();
+    // Si no hay wallet en window, usar starknetkit (modalMode: silent)
+    const { connect } = await import('@starknet-io/starknetkit');
     const wallet = await connect({ modalMode: 'silent' });
-    
     if (wallet?.isConnected && wallet?.account) {
-      console.log('[wallet-config] Found existing connection via get-starknet');
+      console.log('[wallet-config] Found existing connection via starknetkit');
       return wallet.account as Account;
     }
-
     console.log('[wallet-config] No existing wallet connection found');
     return null;
   } catch (error) {

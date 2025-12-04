@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import type { StarknetWindowObject } from 'get-starknet-core';
+import type { StarknetWindowObject } from '@starknet-io/types-js';
 import LoadingGate from './components/LoadingGate';
 import VaultInterface from './components/VaultInterface';
 import ConnectWalletModal from './components/ConnectWalletModal';
