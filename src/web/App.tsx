@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
+import type { StarknetWindowObject } from 'get-starknet-core';
 import LoadingGate from './components/LoadingGate';
 import VaultInterface from './components/VaultInterface';
 import ConnectWalletModal from './components/ConnectWalletModal';
@@ -8,7 +9,7 @@ import { AppState, Theme } from './types';
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.LOADING);
   const [theme, setTheme] = useState<Theme>('dark');
-  const [walletAddress, setWalletAddress] = useState<string>('');
+  const [wallet, setWallet] = useState<StarknetWindowObject | null>(null);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -27,15 +28,19 @@ const App: React.FC = () => {
     setAppState(AppState.CONNECT_WALLET);
   }, []);
 
-  const handleWalletConnected = useCallback((address: string) => {
-    setWalletAddress(address);
+  const handleWalletConnected = useCallback((walletObj: StarknetWindowObject) => {
+    setWallet(walletObj);
     setAppState(AppState.ACTIVE);
   }, []);
 
   const handleLogout = useCallback(() => {
-    setWalletAddress('');
+    if (wallet && 'disable' in wallet && typeof wallet.disable === 'function') {
+      // Disconnect wallet if possible
+      wallet.disable();
+    }
+    setWallet(null);
     setAppState(AppState.CONNECT_WALLET);
-  }, []);
+  }, [wallet]);
 
   return (
     <div className={`relative min-h-screen font-mono transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900 bg-gray-100'}`}>
@@ -54,12 +59,12 @@ const App: React.FC = () => {
           <ConnectWalletModal onConnected={handleWalletConnected} />
         )}
         
-        {appState === AppState.ACTIVE && (
+        {appState === AppState.ACTIVE && wallet && (
           <VaultInterface 
             theme={theme} 
             toggleTheme={toggleTheme} 
             onLogout={handleLogout}
-            walletAddress={walletAddress}
+            wallet={wallet}
           />
         )}
       </div>

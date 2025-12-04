@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import type { StarknetWindowObject } from 'get-starknet-core';
 import { TransferFormState, Theme } from '../types';
 import ZKPassportModal from './ZKPassportModal';
 
@@ -7,9 +8,10 @@ interface VaultInterfaceProps {
   theme: Theme;
   toggleTheme: () => void;
   onLogout: () => void;
+  wallet: StarknetWindowObject;
 }
 
-const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onLogout }) => {
+const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onLogout, wallet }) => {
   const [formData, setFormData] = useState<TransferFormState>({
     amount: '',
     recipient: ''
@@ -20,9 +22,19 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
   const [isZKVerified, setIsZKVerified] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   
-  // Wallet Interaction States
-  const [walletAddress] = useState("0x7F21...3B9A");
-  const [fullAddress] = useState("0x07F2134591238491234891234891239481239481239B9A");
+  // Wallet Interaction States - Extract from connected wallet
+  const [walletAddress, setWalletAddress] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
+  
+  // Extract wallet address on mount
+  useEffect(() => {
+    if (wallet?.selectedAddress) {
+      setFullAddress(wallet.selectedAddress);
+      // Show abbreviated version
+      const addr = wallet.selectedAddress;
+      setWalletAddress(`${addr.slice(0, 6)}...${addr.slice(-4)}`);
+    }
+  }, [wallet]);
   const [showReceiveModal, setShowReceiveModal] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
 

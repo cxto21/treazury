@@ -1,19 +1,48 @@
 
 import React, { useState, useEffect } from 'react';
+import { connect, disconnect } from 'get-starknet';
+import type { StarknetWindowObject } from 'get-starknet-core';
 
 interface ConnectWalletModalProps {
-  onConnected: () => void;
+  onConnected: (wallet: StarknetWindowObject) => void;
 }
 
 const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) => {
   const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleConnect = () => {
+  const handleConnect = async (walletId?: string) => {
     setIsConnecting(true);
-    // Simulate connection delay
-    setTimeout(() => {
-      onConnected();
-    }, 1500);
+    setError(null);
+    
+    try {
+      // Use get-starknet to connect to wallet
+      const wallet = await connect({ 
+        modalMode: "neverAsk",
+        modalTheme: "dark",
+        ...(walletId && { include: [walletId] })
+      });
+      
+      if (!wallet) {
+        throw new Error('No wallet found. Please install Argent X or Braavos.');
+      }
+
+      // Enable wallet and get account
+      await wallet.enable({ starknetVersion: "v5" });
+      
+      if (!wallet.isConnected) {
+        throw new Error('Failed to connect to wallet');
+      }
+
+      // Wait a moment for connection to stabilize
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      onConnected(wallet);
+    } catch (err) {
+      console.error('Wallet connection error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to connect wallet');
+      setIsConnecting(false);
+    }
   };
 
   return (
@@ -28,14 +57,19 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) 
           <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
             Select a Starknet wallet to access Treazury
           </p>
+          {error && (
+            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-red-600 dark:text-red-400 text-xs">
+              {error}
+            </div>
+          )}
         </div>
 
         {/* Wallet Options */}
         <div className="space-y-4">
           <button 
-            onClick={handleConnect}
+            onClick={() => handleConnect('argentX')}
             disabled={isConnecting}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group"
+            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold">A</div>
@@ -45,9 +79,9 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) 
           </button>
 
           <button 
-            onClick={handleConnect}
+            onClick={() => handleConnect('braavos')}
             disabled={isConnecting}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group"
+            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">B</div>
@@ -56,15 +90,15 @@ const ConnectWalletModal: React.FC<ConnectWalletModalProps> = ({ onConnected }) 
           </button>
           
           <button 
-            onClick={handleConnect}
+            onClick={() => handleConnect()}
             disabled={isConnecting}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group"
+            className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
           >
              <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-white font-bold">W</div>
-              <span className="font-bold text-black dark:text-white group-hover:drop-shadow-ink dark:group-hover:drop-shadow-neon">Web Wallet</span>
+              <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-white font-bold">?</div>
+              <span className="font-bold text-black dark:text-white group-hover:drop-shadow-ink dark:group-hover:drop-shadow-neon">Auto-detect</span>
             </div>
-             <span className="text-[10px] uppercase tracking-wider bg-black/10 dark:bg-white/20 px-2 py-1 rounded text-black dark:text-white">Email Login</span>
+             <span className="text-[10px] uppercase tracking-wider bg-black/10 dark:bg-white/20 px-2 py-1 rounded text-black dark:text-white">Any Wallet</span>
           </button>
         </div>
 
