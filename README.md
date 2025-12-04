@@ -65,7 +65,6 @@ Treazury is a non-custodial, privacy-preserving vault for USDC on Starknet that 
 - ✅ Vite production build optimized for Cloudflare Pages (3.23 kB HTML, 212 kB assets)
 - ✅ TypeScript compilation: 0 errors
 - ✅ Dev server running on port 3000
-- ✅ English documentation created (CHECKLIST.md, README_ORIGIN.md)
 
 ### D3 Tasks (Next)
 - [ ] Implement E2E test suite in `/.Tests/`
