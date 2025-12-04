@@ -5,18 +5,23 @@
 ### Phase 1: Setup (2 min)
 
 ```bash
-# 1. Create wallet on Sepolia (if you don't have one)
+# 1. Create wallet on Starknet Sepolia (if you don't have one)
 # → https://www.argent.xyz or https://www.braavos.app/
+# ⚠️ These are STARKNET wallets
 
-# 2. Get ETH on Sepolia
+# 2. Get ETH on ETHEREUM Sepolia (external to Starknet)
 # → https://sepoliafaucet.com
+# 📌 This is on Ethereum Sepolia, NOT Starknet yet
 
-# 3. Swap ETH → USDC on Uniswap Sepolia
-# → https://app.uniswap.org (switch to Sepolia testnet)
+# 3. Swap ETH → USDC on Ethereum Sepolia
+# → Uniswap: https://app.uniswap.org (select Sepolia)
+# → Or any Ethereum DEX
+# 📌 You're still on Ethereum, not Starknet
 
-# 4. Bridge USDC to Starknet Sepolia
+# 4. Bridge USDC from Ethereum Sepolia → Starknet Sepolia
 # → https://starkgate.starknet.io/
 # Select: Ethereum Sepolia → Starknet Sepolia
+# 📌 Now your USDC is native on Starknet!
 ```
 
 ### Phase 2: Testing (3 min)
