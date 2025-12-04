@@ -5,9 +5,8 @@
 mod tests {
     use zkpassport_verifier::treazury_vault::TreazuryVault;
     use zkpassport_verifier::treazury_vault::{
-        TreazuryVault::DepositEvent, TreazuryVault::WithdrawEvent, 
-        TreazuryVault::TransferEvent, TreazuryVault::RolloverEvent,
-        TreazuryVault::KeySetEvent
+        TreazuryVault::DepositEvent, TreazuryVault::WithdrawEvent, TreazuryVault::TransferEvent,
+        TreazuryVault::RolloverEvent, TreazuryVault::KeySetEvent,
     };
     use starknet::{ContractAddress, contract_address_const};
     use starknet::testing::{set_caller_address, set_contract_address};
@@ -50,7 +49,7 @@ mod tests {
 
         let encrypted_amount: felt252 = 0xaabbccdd;
         let amount: u256 = u256 { low: 1000, high: 0 };
-        
+
         state.deposit(encrypted_amount, amount);
 
         let balance = state.get_encrypted_balance(user1_address());
@@ -64,15 +63,15 @@ mod tests {
 
         let encrypted_amount: felt252 = 0xaabbccdd;
         let amount: u256 = u256 { low: 1000, high: 0 };
-        
+
         // First deposit
         state.deposit(encrypted_amount, amount);
-        
+
         // Then withdraw
         let mut proof_array = ArrayTrait::new();
         proof_array.append(0x1);
         proof_array.append(0x2);
-        
+
         state.withdraw(proof_array.span(), amount);
 
         let balance = state.get_encrypted_balance(user1_address());
@@ -86,7 +85,7 @@ mod tests {
 
         let encrypted_amount: felt252 = 0xaabbccdd;
         let amount: u256 = u256 { low: 1000, high: 0 };
-        
+
         // User1 deposits
         state.deposit(encrypted_amount, amount);
 
@@ -95,12 +94,12 @@ mod tests {
         proof_array.append(0x1);
         proof_array.append(0x2);
         proof_array.append(0x3);
-        
+
         state.transfer(user2_address(), encrypted_amount, proof_array.span());
 
         let user1_balance = state.get_encrypted_balance(user1_address());
         let user2_balance = state.get_encrypted_balance(user2_address());
-        
+
         assert(user1_balance == 0, 'User1 balance should be 0');
         assert(user2_balance == encrypted_amount, 'User2 balance incorrect');
     }
@@ -111,7 +110,7 @@ mod tests {
         set_caller_address(user1_address());
 
         let pending_amount: felt252 = 0x12345678;
-        
+
         // Manually set pending balance (in real scenario, this comes from transfer logic)
         state.pending_balances.write(user1_address(), pending_amount);
 
@@ -120,7 +119,7 @@ mod tests {
 
         let current_balance = state.get_encrypted_balance(user1_address());
         let new_pending = state.pending_balances.read(user1_address());
-        
+
         assert(current_balance == pending_amount, 'Rollover failed');
         assert(new_pending == 0, 'Pending should be cleared');
     }
@@ -142,7 +141,7 @@ mod tests {
         // Verify independent balances
         let balance1 = state.get_encrypted_balance(user1_address());
         let balance2 = state.get_encrypted_balance(user2_address());
-        
+
         assert(balance1 == amount1, 'User1 balance incorrect');
         assert(balance2 == amount2, 'User2 balance incorrect');
     }
@@ -164,7 +163,7 @@ mod tests {
         // Verify keys are independent
         let stored_key1 = state.encryption_keys.read(user1_address());
         let stored_key2 = state.encryption_keys.read(user2_address());
-        
+
         assert(stored_key1 == key1, 'User1 key incorrect');
         assert(stored_key2 == key2, 'User2 key incorrect');
         assert(stored_key1 != stored_key2, 'Keys should be different');
@@ -195,7 +194,7 @@ mod tests {
         // Verify User1 has 0 and User2 has amount
         let user1_balance = state.get_encrypted_balance(user1_address());
         let user2_balance = state.get_encrypted_balance(user2_address());
-        
+
         assert(user1_balance == 0, 'Sender balance should be 0');
         assert(user2_balance == amount, 'Recipient should have amount');
     }

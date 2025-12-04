@@ -93,7 +93,8 @@ pub mod DonationBadge {
 
             let verifier_address = self.verifier_contract.read();
             let dispatcher = IHonkVerifierDispatcher { contract_address: verifier_address };
-            let verification_result = dispatcher.verify_ultra_keccak_honk_proof(full_proof_with_hints);
+            let verification_result = dispatcher
+                .verify_ultra_keccak_honk_proof(full_proof_with_hints);
             assert(verification_result.is_some(), 'Proof verification failed');
 
             let public_inputs = verification_result.unwrap();
@@ -102,7 +103,10 @@ pub mod DonationBadge {
             let verified_threshold = *public_inputs.at(0);
             let verified_commitment = *public_inputs.at(1);
             let verified_tier_u256 = *public_inputs.at(2);
-            let verified_tier: u8 = verified_tier_u256.low.try_into().expect('Tier conversion failed');
+            let verified_tier: u8 = verified_tier_u256
+                .low
+                .try_into()
+                .expect('Tier conversion failed');
 
             assert(verified_threshold == threshold, 'Threshold mismatch');
             assert(verified_commitment == donation_commitment, 'Commitment mismatch');
@@ -122,11 +126,14 @@ pub mod DonationBadge {
                 }
             }
 
-            self.emit(Event::BadgeClaimed(BadgeClaimed {
-                recipient: caller,
-                tier: badge_tier,
-                commitment_hash: commitment_key,
-            }));
+            self
+                .emit(
+                    Event::BadgeClaimed(
+                        BadgeClaimed {
+                            recipient: caller, tier: badge_tier, commitment_hash: commitment_key,
+                        },
+                    ),
+                );
             true
         }
 
@@ -144,11 +151,7 @@ pub mod DonationBadge {
         }
 
         fn get_badge_counts(self: @ContractState) -> (u64, u64, u64) {
-            (
-                self.total_bronze.read(),
-                self.total_silver.read(),
-                self.total_gold.read(),
-            )
+            (self.total_bronze.read(), self.total_silver.read(), self.total_gold.read())
         }
     }
 }
