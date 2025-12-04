@@ -4,12 +4,14 @@ import type { StarknetWindowObject } from 'get-starknet-core';
 import LoadingGate from './components/LoadingGate';
 import VaultInterface from './components/VaultInterface';
 import ConnectWalletModal from './components/ConnectWalletModal';
+import DevWarningModal from './components/DevWarningModal';
 import { AppState, Theme } from './types';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.LOADING);
   const [theme, setTheme] = useState<Theme>('dark');
   const [wallet, setWallet] = useState<StarknetWindowObject | null>(null);
+  const [showDevWarning, setShowDevWarning] = useState(true);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -26,6 +28,10 @@ const App: React.FC = () => {
 
   const handleLoadingComplete = useCallback(() => {
     setAppState(AppState.CONNECT_WALLET);
+  }, []);
+
+  const handleDevWarningAccept = useCallback(() => {
+    setShowDevWarning(false);
   }, []);
 
   const handleWalletConnected = useCallback((walletObj: StarknetWindowObject) => {
@@ -49,6 +55,9 @@ const App: React.FC = () => {
 
       {/* Scanline Overlay Effect */}
       <div className="fixed inset-0 scanline-overlay z-40 pointer-events-none opacity-50 dark:opacity-100"></div>
+
+      {/* Development Warning Modal */}
+      {showDevWarning && <DevWarningModal onAccept={handleDevWarningAccept} />}
 
       <div className="relative z-0">
         {appState === AppState.LOADING && (
