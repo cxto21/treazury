@@ -27,13 +27,32 @@ const ZKPassportModal: React.FC<ZKPassportModalProps> = ({ onClose, onSuccess })
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [passportData, setPassportData] = useState<PassportData | null>(null);
   const [ocrProgress, setOcrProgress] = useState<number>(0);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const webcamRef = useRef<Webcam>(null);
 
   const startScan = (type: 'id' | 'passport') => {
     setDocumentType(type);
     setStep(ZKStep.SCANNING);
     setErrorMessage(null);
+    setCameraReady(false);
+    setCameraError(null);
   };
+
+  // Handle camera user media events
+  const handleUserMedia = useCallback(() => {
+    console.log('[ZKPassport] Camera ready');
+    setCameraReady(true);
+    setCameraError(null);
+  }, []);
+
+  const handleUserMediaError = useCallback((error: string | DOMException) => {
+    console.error('[ZKPassport] Camera error:', error);
+    const errorMsg = typeof error === 'string' ? error : error.message || 'Camera access denied';
+    setCameraError(errorMsg);
+    setCameraReady(false);
+    setErrorMessage(`Camera error: ${errorMsg}. Please allow camera access in your browser settings.`);
+  }, []);
 
   // Capture image from webcam
   const capturePhoto = useCallback(() => {
@@ -224,29 +243,62 @@ const ZKPassportModal: React.FC<ZKPassportModalProps> = ({ onClose, onSuccess })
               <p className="text-xs text-gray-500 mb-4">Place the document flat on a surface with good lighting. The MRZ (bottom lines) must be clearly visible.</p>
               
               {/* Webcam Feed */}
-              <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border-2 border-black dark:border-white">
+              <div className="relative w-full bg-black rounded-xl overflow-hidden border-2 border-black dark:border-white" style={{ minHeight: '500px', maxHeight: '70vh', aspectRatio: '4/3' }}>
                 <Webcam
                   ref={webcamRef}
                   audio={false}
                   screenshotFormat="image/jpeg"
                   videoConstraints={{
                     facingMode: 'environment', // Use rear camera on mobile
-                    width: 1280,
-                    height: 720,
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
                   }}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onUserMedia={handleUserMedia}
+                  onUserMediaError={handleUserMediaError}
                 />
                 
-                {/* MRZ Guide Overlay */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] h-20 border-2 border-dashed border-green-400 rounded flex items-center justify-center">
-                  <span className="text-xs text-green-400 bg-black/50 px-2 py-1 rounded font-mono">Align MRZ here</span>
-                </div>
+                {/* Camera Loading Indicator */}
+                {!cameraReady && !cameraError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm z-10">
+                    <div className="text-center">
+                      <div className="w-16 h-16 border-4 border-t-green-400 border-gray-600 rounded-full animate-spin mx-auto mb-6"></div>
+                      <p className="text-white text-lg font-bold mb-2 font-mono">Initializing Camera...</p>
+                      <p className="text-white/60 text-sm">Please allow camera access when prompted</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Camera Error State */}
+                {cameraError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-red-950/95 backdrop-blur-sm z-10">
+                    <div className="text-center p-8 max-w-sm">
+                      <p className="text-4xl mb-4">📷</p>
+                      <p className="text-white text-2xl font-black mb-4">Camera Access Denied</p>
+                      <p className="text-white/80 text-sm font-mono mb-6 leading-relaxed">We need camera access to scan your document. Please:<br/>1. Check your browser settings<br/>2. Grant camera permission<br/>3. Refresh and try again</p>
+                      <button onClick={() => window.location.reload()} className="bg-white text-red-950 font-bold px-6 py-2 rounded-lg hover:bg-red-100 transition-all">
+                        🔄 Refresh Page
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* MRZ Guide Overlay - Larger document area */}
+                {cameraReady && !cameraError && (
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] h-[75%] border-4 border-solid border-green-400 rounded-lg flex items-end justify-center pb-8 bg-transparent shadow-[inset_0_0_0_2px_rgba(74,222,128,0.5)]">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[92%] h-32 border-3 border-solid border-yellow-400 rounded-lg bg-yellow-400/5 flex items-center justify-center">
+                      <span className="text-center text-sm text-yellow-300 font-bold font-mono px-4">📍 ALIGN MRZ (bottom document lines) HERE 📍</span>
+                    </div>
+                    <span className="absolute top-6 left-1/2 -translate-x-1/2 text-lg font-black text-green-300 bg-black/80 px-6 py-3 rounded-lg shadow-lg">✓ DOCUMENT FRAME</span>
+                  </div>
+                )}
               </div>
 
               {/* Capture Button */}
               <button
                 onClick={capturePhoto}
-                className="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold rounded-xl hover:scale-105 transition-transform shadow-ink dark:shadow-neon"
+                disabled={!cameraReady || !!cameraError}
+                className="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold rounded-xl hover:scale-105 transition-transform shadow-ink dark:shadow-neon disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 📸 Capture Photo
               </button>

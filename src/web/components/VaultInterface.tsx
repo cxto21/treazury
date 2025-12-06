@@ -3,7 +3,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { StarknetWindowObject } from '@starknet-io/types-js';
 import { TransferFormState, Theme } from '../types';
 import ZKPassportModal from './ZKPassportModal';
+import USDCDepositComponent from './USDCDepositComponent';
 import { getEncryptedBalance, transfer, isVaultPaused, formatUSDC } from '../vault-service';
+import { RpcProvider } from 'starknet';
 
 interface VaultInterfaceProps {
   theme: Theme;
@@ -17,6 +19,7 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
     amount: '',
     recipient: ''
   });
+  const [activeTab, setActiveTab] = useState<'transfer' | 'deposit'>('transfer');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBalanceRevealed, setIsBalanceRevealed] = useState(false);
   const [showZKModal, setShowZKModal] = useState(false);
@@ -32,6 +35,9 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
   const [walletAddress, setWalletAddress] = useState("");
   const [fullAddress, setFullAddress] = useState("");
   
+  // Provider for USDC deposit component
+  const [provider, setProvider] = useState<RpcProvider | null>(null);
+  
   // Extract wallet address on mount
   useEffect(() => {
     if (wallet?.selectedAddress) {
@@ -39,6 +45,12 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
       // Show abbreviated version
       const addr = wallet.selectedAddress;
       setWalletAddress(`${addr.slice(0, 6)}...${addr.slice(-4)}`);
+      
+      // Initialize provider
+      const rpcProvider = new RpcProvider({
+        nodeUrl: 'https://starknet-sepolia.g.alchemy.com/starknet/version/rpc/v0_9/cf52O0RwFy1mEB0uoYsel'
+      });
+      setProvider(rpcProvider);
       
       // Load vault data
       loadVaultData(addr);
@@ -352,7 +364,33 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
             </svg>
           </div>
 
-          <div className="mb-8">
+          {/* Tab Switcher */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setActiveTab('transfer')}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs md:text-sm uppercase tracking-wider transition-all ${
+                activeTab === 'transfer'
+                  ? 'bg-black dark:bg-white text-white dark:text-black shadow-ink dark:shadow-neon'
+                  : 'bg-white/40 dark:bg-black/20 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10'
+              }`}
+            >
+              💸 Transfer
+            </button>
+            <button
+              onClick={() => setActiveTab('deposit')}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs md:text-sm uppercase tracking-wider transition-all ${
+                activeTab === 'deposit'
+                  ? 'bg-black dark:bg-white text-white dark:text-black shadow-ink dark:shadow-neon'
+                  : 'bg-white/40 dark:bg-black/20 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white border border-black/10 dark:border-white/10'
+              }`}
+            >
+              💰 Deposit USDC
+            </button>
+          </div>
+
+          {activeTab === 'transfer' && (
+            <div className="animate-[fadeIn_0.3s]">
+              <div className="mb-8">
             <div className="flex items-center">
               <div className="w-1.5 h-1.5 bg-black dark:bg-white rounded-full mr-4 animate-pulse shadow-ink dark:shadow-neon"></div>
               <span className="text-lg md:text-xl font-black uppercase tracking-widest text-black dark:text-white drop-shadow-ink dark:drop-shadow-neon transition-all">PRIVATE ZK TRANSFER</span>
@@ -434,7 +472,40 @@ const VaultInterface: React.FC<VaultInterfaceProps> = ({ theme, toggleTheme, onL
               </span>
               <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
             </button>
-          </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'deposit' && provider && wallet?.account && (
+            <div className="animate-[fadeIn_0.3s]">
+              <div className="mb-6">
+                <div className="flex items-center">
+                  <div className="w-1.5 h-1.5 bg-black dark:bg-white rounded-full mr-4 animate-pulse shadow-ink dark:shadow-neon"></div>
+                  <span className="text-lg md:text-xl font-black uppercase tracking-widest text-black dark:text-white drop-shadow-ink dark:drop-shadow-neon transition-all">USDC DEPOSIT</span>
+                </div>
+                <div className="ml-5 mt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-black/50 dark:text-white/50">
+                    Bridge USDC from Ethereum → Deposit to Tongo Vault
+                  </span>
+                </div>
+              </div>
+              
+              <USDCDepositComponent
+                account={wallet.account}
+                provider={provider}
+                network="sepolia"
+                onDepositComplete={(amount, txHash) => {
+                  console.log('Deposited:', amount, 'TxHash:', txHash);
+                  setTxStatus(`Deposit complete! ${txHash.slice(0, 20)}...`);
+                  // Reload balance after deposit
+                  if (wallet?.selectedAddress) {
+                    loadVaultData(wallet.selectedAddress);
+                  }
+                  setTimeout(() => setTxStatus(null), 5000);
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Status Panel with ZKPassport Integration */}
